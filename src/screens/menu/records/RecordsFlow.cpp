@@ -11,8 +11,8 @@ void ModeScreen::onEnter() {
     story.rect = { 20, 135, 200, 60 };
     free.rect  = { 20, 205, 200, 60 };
     party.rect = { 20, 275, 200, 60 };
-    story.bgRel = free.bgRel = party.bgRel = "sprites/menu/buttons/1384.png";
-    story.bgRelActive = free.bgRelActive = party.bgRelActive = "sprites/menu/buttons/1384.png";
+    story.bgRel = free.bgRel = party.bgRel = "sprites/UI/Menu/Buttons/1384.png";
+    story.bgRelActive = free.bgRelActive = party.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
 }
 
 void ModeScreen::update(const UpdateContext& ctx) {
@@ -35,18 +35,18 @@ static void drawModeRow(const DrawContext& ctx, const ui::SpriteButton& b, const
     auto t = ctx.assets->tex(textRel).tex;
     if (t.id) DrawCentered(t, b.rect.x + b.rect.width/2, b.rect.y + b.rect.height/2 + 6);
     if (locked) {
-        auto lock = ctx.assets->tex("sprites/menu/buttons/1353.png").tex;
+        auto lock = ctx.assets->tex("sprites/UI/Menu/Buttons/1353.png").tex;
         if (lock.id) DrawTexture(lock, (int)(b.rect.x + b.rect.width - lock.width - 18), (int)(b.rect.y + 10), WHITE);
     }
 }
 
 void ModeScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
-    auto title = ctx.assets->tex("sprites/menu/russian/0050.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0050.png").tex;
     DrawTexture(title, 10, 18, WHITE);
-    drawModeRow(ctx, story, "sprites/menu/russian/0017.png", false);
-    drawModeRow(ctx, free,  "sprites/menu/russian/0055.png", false);
-    drawModeRow(ctx, party, "sprites/menu/russian/0054.png", !ctx.profile->storyCompleted);
+    drawModeRow(ctx, story, "sprites/UI/Menu/Russian/0017.png", false);
+    drawModeRow(ctx, free,  "sprites/UI/Menu/Russian/0055.png", false);
+    drawModeRow(ctx, party, "sprites/UI/Menu/Russian/0054.png", !ctx.profile->storyCompleted);
     DrawTextCentered("Choose mode", 120, 110, 12, Fade(RAYWHITE, 0.8f));
 }
 
@@ -55,8 +55,8 @@ void DifficultyScreen::onEnter() {
     easy.rect = { 20, 145, 200, 60 };
     med.rect  = { 20, 215, 200, 60 };
     hard.rect = { 20, 285, 200, 60 };
-    easy.bgRel = med.bgRel = hard.bgRel = "sprites/menu/buttons/1384.png";
-    easy.bgRelActive = med.bgRelActive = hard.bgRelActive = "sprites/menu/buttons/1384.png";
+    easy.bgRel = med.bgRel = hard.bgRel = "sprites/UI/Menu/Buttons/1384.png";
+    easy.bgRelActive = med.bgRelActive = hard.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
 }
 
 void DifficultyScreen::update(const UpdateContext& ctx) {
@@ -79,27 +79,27 @@ static void drawDiffRow(const DrawContext& ctx, const ui::SpriteButton& b, const
     auto t = ctx.assets->tex(textRel).tex;
     if (t.id) DrawCentered(t, b.rect.x + b.rect.width/2, b.rect.y + b.rect.height/2 + 6);
     if (locked) {
-        auto lock = ctx.assets->tex("sprites/menu/buttons/1353.png").tex;
+        auto lock = ctx.assets->tex("sprites/UI/Menu/Buttons/1353.png").tex;
         if (lock.id) DrawTexture(lock, (int)(b.rect.x + b.rect.width - lock.width - 18), (int)(b.rect.y + 10), WHITE);
     }
 }
 
 void DifficultyScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
-    auto title = ctx.assets->tex("sprites/menu/russian/0050.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0050.png").tex;
     DrawTexture(title, 10, 18, WHITE);
     DrawTextCentered("Difficulty", 120, 118, 14, RAYWHITE);
-    drawDiffRow(ctx, easy, "sprites/menu/russian/0024.png", false);
-    drawDiffRow(ctx, med,  "sprites/menu/russian/0025.png", false);
-    drawDiffRow(ctx, hard, "sprites/menu/russian/0026.png", !ctx.profile->storyCompleted);
+    drawDiffRow(ctx, easy, "sprites/UI/Menu/Russian/0024.png", false);
+    drawDiffRow(ctx, med,  "sprites/UI/Menu/Russian/0025.png", false);
+    drawDiffRow(ctx, hard, "sprites/UI/Menu/Russian/0026.png", !ctx.profile->storyCompleted);
 }
 
 // RecordsScreen
 void RecordsScreen::onEnter() {
     btnPrev.rect = { 30, 310, 40, 40 };
     btnNext.rect = { 170, 310, 40, 40 };
-    btnPrev.bgRel = "sprites/menu/buttons/1404.png";
-    btnNext.bgRel = "sprites/menu/buttons/1411.png";
+    btnPrev.bgRel = "sprites/UI/Menu/Buttons/1404.png";
+    btnNext.bgRel = "sprites/UI/Menu/Buttons/1411.png";
     carousel.speed = 8.5f;
     level = 1;
 }
@@ -138,7 +138,7 @@ static const char* gradeFor(int score) {
 
 void RecordsScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
-    auto title = ctx.assets->tex("sprites/menu/russian/0050.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0050.png").tex;
     DrawTexture(title, 10, 18, WHITE);
 
     Rectangle card = { 30, 90, 180, 190 };

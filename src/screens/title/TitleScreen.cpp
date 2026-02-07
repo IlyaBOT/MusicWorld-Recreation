@@ -14,8 +14,8 @@ void TitleScreen::update(const UpdateContext& ctx) {
 
 void TitleScreen::draw(const DrawContext& ctx) {
     // reuse menu bg for now
-    auto top = ctx.assets->tex("sprites/menu/1414.png").tex;
-    auto half = ctx.assets->tex("sprites/menu/1415.png").tex;
+    auto top = ctx.assets->tex("sprites/UI/top.png").tex;
+    auto half = ctx.assets->tex("sprites/UI/background_half.png").tex;
 
     if (top.id && half.id) {
         DrawTexture(top, 0, 0, WHITE);
@@ -28,17 +28,17 @@ void TitleScreen::draw(const DrawContext& ctx) {
         ClearBackground({70, 10, 95, 255});
     }
 
-    auto logo = ctx.assets->tex("sprites/title/1192.png").tex;
-    auto lg   = ctx.assets->tex("sprites/title/1193.png").tex;
-    auto tap  = ctx.assets->tex("sprites/menu/russian/0035.png").tex;
+    auto logo = ctx.assets->tex("sprites/UI/Title/1192.png").tex;
+    auto lg   = ctx.assets->tex("sprites/UI/Title/1193.png").tex;
+    auto tap  = ctx.assets->tex("sprites/UI/Menu/Russian/0035.png").tex;
 
     DrawCentered(logo, 120, 190);
     DrawCentered(lg, 120, 315);
     DrawCentered(tap, 120, 352);
 
     if (ctx.debug) {
-        if (!logo.id) DrawText("missing sprites/title/1192.png", 6, 6, 12, YELLOW);
-        if (!lg.id)   DrawText("missing sprites/title/1193.png", 6, 20, 12, YELLOW);
-        if (!tap.id)  DrawText("missing sprites/menu/russian/0035.png", 6, 34, 12, YELLOW);
+        if (!logo.id) DrawText("missing sprites/UI/Title/1192.png", 6, 6, 12, YELLOW);
+        if (!lg.id)   DrawText("missing sprites/UI/Title/1193.png", 6, 20, 12, YELLOW);
+        if (!tap.id)  DrawText("missing sprites/UI/Menu/Russian/0035.png", 6, 34, 12, YELLOW);
     }
 }

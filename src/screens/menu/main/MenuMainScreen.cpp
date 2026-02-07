@@ -12,20 +12,20 @@
 static ui::SpriteButton makeItem(float y, const std::string& labelRel) {
     ui::SpriteButton b;
     b.rect = { 22, y, 196, 36 };
-    b.bgRel = "sprites/menu/buttons/1359.png";
-    b.bgRelActive = "sprites/menu/buttons/1360.png";
+    b.bgRel = "sprites/UI/Menu/Buttons/1359.png";
+    b.bgRelActive = "sprites/UI/Menu/Buttons/1360.png";
     b.labelRel = labelRel;
     return b;
 }
 
 void MenuMainScreen::onEnter() {
     items_.clear();
-    items_.push_back(makeItem(122, "sprites/menu/russian/0004.png")); // Game
-    items_.push_back(makeItem(162, "sprites/menu/russian/0005.png")); // Player
-    items_.push_back(makeItem(202, "sprites/menu/russian/0006.png")); // Help
-    items_.push_back(makeItem(242, "sprites/menu/russian/0007.png")); // Settings
-    items_.push_back(makeItem(282, "sprites/menu/russian/0008.png")); // Records
-    items_.push_back(makeItem(322, "sprites/menu/russian/0036.png")); // Exit
+    items_.push_back(makeItem(122, "sprites/UI/Menu/Russian/0004.png")); // Game
+    items_.push_back(makeItem(162, "sprites/UI/Menu/Russian/0005.png")); // Player
+    items_.push_back(makeItem(202, "sprites/UI/Menu/Russian/0006.png")); // Help
+    items_.push_back(makeItem(242, "sprites/UI/Menu/Russian/0007.png")); // Settings
+    items_.push_back(makeItem(282, "sprites/UI/Menu/Russian/0008.png")); // Records
+    items_.push_back(makeItem(322, "sprites/UI/Menu/Russian/0036.png")); // Exit
     focus_ = 0;
 }
 
@@ -53,7 +53,7 @@ void MenuMainScreen::update(const UpdateContext& ctx) {
 void MenuMainScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
 
-    auto title = ctx.assets->tex("sprites/menu/russian/0046.png").tex; // "МЕНЮ"
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0046.png").tex; // "МЕНЮ"
     DrawAt(title, 10, 18);
 
     for (int i = 0; i < (int)items_.size(); ++i) {

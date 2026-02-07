@@ -5,8 +5,8 @@
 
 void SettingsScreen::onEnter() {
     vibToggle_.rect = { 30, 120, 180, 46 };
-    vibToggle_.bgRel = "sprites/menu/buttons/1359.png";
-    vibToggle_.bgRelActive = "sprites/menu/buttons/1360.png";
+    vibToggle_.bgRel = "sprites/UI/Menu/Buttons/1359.png";
+    vibToggle_.bgRelActive = "sprites/UI/Menu/Buttons/1360.png";
     sliderNotes_ = { 30, 205, 180, 18 };
     sliderSound_ = { 30, 275, 180, 18 };
 }
@@ -25,8 +25,8 @@ static int valueFromX(Rectangle r, float x, int min, int max, int steps) {
 }
 
 static void drawSlider(const DrawContext& ctx, Rectangle r, int value, int min, int max) {
-    auto bar = ctx.assets->tex("sprites/menu/buttons/1338.png").tex;
-    auto knob = ctx.assets->tex("sprites/menu/buttons/1358.png").tex;
+    auto bar = ctx.assets->tex("sprites/UI/Menu/Buttons/1338.png").tex;
+    auto knob = ctx.assets->tex("sprites/UI/Menu/Buttons/1358.png").tex;
 
     if (bar.id) DrawTexture(bar, (int)r.x, (int)r.y-2, WHITE);
     else DrawRectangle((int)r.x, (int)r.y, (int)r.width, (int)r.height, Fade(RAYWHITE, 0.25f));
@@ -70,13 +70,13 @@ void SettingsScreen::update(const UpdateContext& ctx) {
 void SettingsScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
 
-    auto title = ctx.assets->tex("sprites/menu/russian/0052.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0052.png").tex;
     DrawTexture(title, 10, 18, WHITE);
 
     vibToggle_.draw(*ctx.assets);
     DrawText("VIBRATION", 38, 132, 14, RAYWHITE);
-    auto on = ctx.assets->tex("sprites/menu/buttons/0077.png").tex;
-    auto off = ctx.assets->tex("sprites/menu/buttons/0078.png").tex;
+    auto on = ctx.assets->tex("sprites/UI/Menu/Buttons/0077.png").tex;
+    auto off = ctx.assets->tex("sprites/UI/Menu/Buttons/0078.png").tex;
     if (ctx.profile->vibration) {
         if (on.id) DrawTexture(on, 140, 128, WHITE);
         else DrawText("ON", 160, 132, 14, YELLOW);

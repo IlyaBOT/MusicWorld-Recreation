@@ -32,8 +32,8 @@ void HelpScreen::onEnter() {
     idx_ = 0;
     btnPrev_.rect = { 30, 310, 40, 40 };
     btnNext_.rect = { 170, 310, 40, 40 };
-    btnPrev_.bgRel = "sprites/menu/buttons/1404.png";
-    btnNext_.bgRel = "sprites/menu/buttons/1411.png";
+    btnPrev_.bgRel = "sprites/UI/Menu/Buttons/1404.png";
+    btnNext_.bgRel = "sprites/UI/Menu/Buttons/1411.png";
     carousel_.speed = 8.5f;
 }
 
@@ -61,7 +61,7 @@ void HelpScreen::update(const UpdateContext& ctx) {
 void HelpScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
 
-    auto title = ctx.assets->tex("sprites/menu/russian/0051.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0051.png").tex;
     DrawTexture(title, 10, 18, WHITE);
 
     Rectangle card = { 20, 90, 200, 200 };

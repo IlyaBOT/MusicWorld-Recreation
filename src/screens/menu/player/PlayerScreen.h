@@ -14,7 +14,7 @@ public:
 private:
     struct Track {
         std::string fileRel;     // music/levels/xx-*.mp3 (relative to assets/)
-        std::string namePngRel;  // sprites/menu/russian/0100.png etc
+        std::string namePngRel;  // sprites/UI/Menu/Russian/0100.png etc
         std::string iconRel;     // sprites/player/trackicon_01.png
         std::string titleText;   // fallback
     };

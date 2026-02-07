@@ -10,8 +10,8 @@ void ModeSelectScreen::onEnter() {
     free_.rect = { 20, 210, 100, 100 };
     party_.rect = { 120, 210, 100, 100 };
 
-    dj_.bgRel = story_.bgRel = free_.bgRel = party_.bgRel = "sprites/menu/buttons/1384.png";
-    dj_.bgRelActive = story_.bgRelActive = free_.bgRelActive = party_.bgRelActive = "sprites/menu/buttons/1384.png";
+    dj_.bgRel = story_.bgRel = free_.bgRel = party_.bgRel = "sprites/UI/Menu/Buttons/1384.png";
+    dj_.bgRelActive = story_.bgRelActive = free_.bgRelActive = party_.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
 }
 
 void ModeSelectScreen::update(const UpdateContext& ctx) {
@@ -59,7 +59,7 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
         DrawTexture(txt, (int)(cx - txt.width/2), (int)(y), WHITE);
     }
     if (locked) {
-        auto lock = ctx.assets->tex("sprites/menu/buttons/1353.png").tex;
+        auto lock = ctx.assets->tex("sprites/UI/Menu/Buttons/1353.png").tex;
         if (lock.id) DrawTexture(lock, (int)(b.rect.x + b.rect.width/2 - lock.width/2), (int)(b.rect.y + b.rect.height/2 - lock.height/2), WHITE);
         else DrawText("LOCK", (int)b.rect.x + 34, (int)b.rect.y + 44, 16, RED);
     }
@@ -67,13 +67,13 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
 
 void ModeSelectScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
-    auto title = ctx.assets->tex("sprites/menu/russian/0058.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0058.png").tex;
     DrawTexture(title, 10, 18, WHITE);
 
-    drawBubble(ctx, dj_,    "sprites/menu/buttons/1224.png", "sprites/menu/russian/0053.png", false);
-    drawBubble(ctx, story_, "sprites/menu/buttons/1225.png", "sprites/menu/russian/0017.png", false);
-    drawBubble(ctx, free_,  "sprites/menu/buttons/1226.png", "sprites/menu/russian/0055.png", false);
-    drawBubble(ctx, party_, "sprites/menu/buttons/1227.png", "sprites/menu/russian/0054.png", !ctx.profile->storyCompleted);
+    drawBubble(ctx, dj_,    "sprites/UI/Menu/Buttons/1224.png", "sprites/UI/Menu/Russian/0053.png", false);
+    drawBubble(ctx, story_, "sprites/UI/Menu/Buttons/1225.png", "sprites/UI/Menu/Russian/0017.png", false);
+    drawBubble(ctx, free_,  "sprites/UI/Menu/Buttons/1226.png", "sprites/UI/Menu/Russian/0055.png", false);
+    drawBubble(ctx, party_, "sprites/UI/Menu/Buttons/1227.png", "sprites/UI/Menu/Russian/0054.png", !ctx.profile->storyCompleted);
 
     if (ctx.debug) DrawText("ModeSelectScreen", 6, 384, 12, YELLOW);
 }

@@ -31,7 +31,7 @@ void PlayerScreen::scanTracks() {
 
         int nameId = 100 + (n - 1);
         char buf[64];
-        snprintf(buf, sizeof(buf), "sprites/menu/russian/%04d.png", nameId);
+        snprintf(buf, sizeof(buf), "sprites/UI/Menu/Russian/%04d.png", nameId);
         t.namePngRel = buf;
 
         char ibuf[64];
@@ -44,7 +44,7 @@ void PlayerScreen::scanTracks() {
     if (tracks_.empty()) {
         Track t;
         t.fileRel = "music/levels/01-Example.mp3";
-        t.namePngRel = "sprites/menu/russian/0100.png";
+        t.namePngRel = "sprites/UI/Menu/Russian/0100.png";
         t.iconRel = "sprites/player/trackicon_01.png";
         t.titleText = "No tracks in assets/music/levels/";
         tracks_.push_back(t);
@@ -75,9 +75,9 @@ void PlayerScreen::onEnter() {
     btnNext_.rect = { 170, 310, 40, 40 };
     btnPlay_.rect = { 95, 300, 50, 50 };
 
-    btnPrev_.bgRel = "sprites/menu/buttons/1404.png";
-    btnNext_.bgRel = "sprites/menu/buttons/1411.png";
-    btnPlay_.bgRel = "sprites/menu/buttons/1319.png";
+    btnPrev_.bgRel = "sprites/UI/Menu/Buttons/1404.png";
+    btnNext_.bgRel = "sprites/UI/Menu/Buttons/1411.png";
+    btnPlay_.bgRel = "sprites/UI/Menu/Buttons/1319.png";
 
     carousel_.speed = 8.5f;
 
@@ -124,7 +124,7 @@ void PlayerScreen::update(const UpdateContext& ctx) {
 }
 
 static void drawEq(const DrawContext& ctx, float x, float y) {
-    auto seg = ctx.assets->tex("sprites/menu/buttons/1323.png").tex;
+    auto seg = ctx.assets->tex("sprites/UI/Menu/Buttons/1323.png").tex;
     if (!seg.id) { DrawText("EQ missing 1323.png", (int)x, (int)y, 12, YELLOW); return; }
     for (int i=0;i<10;i++) {
         float dy = (float)((i*37 + (int)(GetTime()*60)) % 12);
@@ -135,7 +135,7 @@ static void drawEq(const DrawContext& ctx, float x, float y) {
 void PlayerScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets);
 
-    auto title = ctx.assets->tex("sprites/menu/russian/0049.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0049.png").tex;
     DrawTexture(title, 10, 18, WHITE);
 
     Rectangle card = { 30, 90, 180, 190 };
@@ -156,7 +156,7 @@ void PlayerScreen::draw(const DrawContext& ctx) {
 
     btnPrev_.draw(*ctx.assets);
     btnNext_.draw(*ctx.assets);
-    btnPlay_.bgRel = playing_ ? "sprites/menu/buttons/1320.png" : "sprites/menu/buttons/1319.png";
+    btnPlay_.bgRel = playing_ ? "sprites/UI/Menu/Buttons/1320.png" : "sprites/UI/Menu/Buttons/1319.png";
     btnPlay_.draw(*ctx.assets);
 
     if (ctx.debug) DrawText(TextFormat("tracks=%d idx=%d", (int)tracks_.size(), idx_), 6, 384, 12, YELLOW);
