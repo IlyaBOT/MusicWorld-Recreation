@@ -1,0 +1,18 @@
+{
+  "animations": [
+    {
+      "name": "example_bounce",
+      "loop": true,
+      "frames": [
+        {
+          "path": "assets/sprites/UI/1423.png",
+          "dur": 0.1
+        },
+        {
+          "path": "assets/sprites/UI/1419.png",
+          "dur": 0.1
+        }
+      ]
+    }
+  ]
+}

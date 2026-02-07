@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.18)
+project(mw_recreation LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+option(MW_USE_SYSTEM_RAYLIB "Use system-installed raylib instead of FetchContent" OFF)
+
+if(MW_USE_SYSTEM_RAYLIB)
+  find_package(raylib 5.0 REQUIRED)
+else()
+  include(FetchContent)
+  set(FETCHCONTENT_QUIET OFF)
+  FetchContent_Declare(
+    raylib
+    GIT_REPOSITORY https://github.com/raysan5/raylib.git
+    GIT_TAG 5.0
+  )
+  FetchContent_MakeAvailable(raylib)
+endif()
+
+add_executable(mw_recreation
+  src/main.cpp
+
+  src/core/App.cpp
+  src/core/Assets.cpp
+  src/core/Input.cpp
+  src/core/Profile.cpp
+  src/core/VirtualScreen.cpp
+
+  src/ui/Widgets.cpp
+
+  src/screens/splash/SplashScreen.cpp
+  src/screens/title/TitleScreen.cpp
+
+  src/screens/menu/main/MenuMainScreen.cpp
+  src/screens/menu/mode/ModeSelectScreen.cpp
+  src/screens/menu/difficulty/DifficultyScreen.cpp
+  src/screens/menu/player/PlayerScreen.cpp
+  src/screens/menu/help/HelpScreen.cpp
+  src/screens/menu/settings/SettingsScreen.cpp
+  src/screens/menu/records/RecordsFlow.cpp
+
+  src/screens/gameplay/GameplayPlaceholderScreen.cpp
+)
+
+target_include_directories(mw_recreation PRIVATE src)
+target_link_libraries(mw_recreation PRIVATE raylib)
+
+if (APPLE)
+  target_link_libraries(mw_recreation PRIVATE "-framework Cocoa" "-framework IOKit" "-framework OpenGL")
+endif()
