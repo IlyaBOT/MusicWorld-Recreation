@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(MW_USE_SYSTEM_RAYLIB "Use system-installed raylib instead of FetchContent" OFF)
 
 if(MW_USE_SYSTEM_RAYLIB)
-  find_package(raylib 5.0 REQUIRED)
+  find_package(raylib 5.5 REQUIRED)
 else()
   include(FetchContent)
   set(FETCHCONTENT_QUIET OFF)
   FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
-    GIT_TAG 5.0
+    GIT_TAG        5.5
   )
   FetchContent_MakeAvailable(raylib)
 endif()
