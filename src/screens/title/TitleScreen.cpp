@@ -18,6 +18,8 @@ constexpr const char* kTapIdlePrimary = "sprites/UI/Menu/Buttons/tap-btn.png";
 constexpr const char* kTapIdleFallback = "sprites/UI/Menu/Russian/tap-btn.png";
 constexpr const char* kTapActivePrimary = "sprites/UI/Menu/Buttons/tap-btn_selected.png";
 constexpr const char* kTapActiveFallback = "sprites/UI/Menu/Russian/tap-btn_selected.png";
+constexpr const char* kTitleMusicRel = "music/title.mp3";
+constexpr float kTitleReplayDelaySec = 1.0f;
 
 std::string ResolvePath(const char* primary, const char* fallback) {
     if (FileExists(Assets::A(primary).c_str())) return primary;
@@ -42,10 +44,38 @@ void TitleScreen::onEnter() {
     tapButton_.rect = {11.0f, 339.0f, 218.0f, 26.0f};
     tapButton_.bgRel = ResolvePath(kTapIdlePrimary, kTapIdleFallback);
     tapButton_.bgRelActive = ResolvePath(kTapActivePrimary, kTapActiveFallback);
+
+    titleMusic_ = {};
+    titleMusicOk_ = false;
+    titleMusicPlaying_ = false;
+    titleReplayDelay_ = 0.0f;
+    if (loadTitleMusic()) startTitleMusic();
+}
+
+void TitleScreen::onExit() {
+    unloadTitleMusic();
+    titleReplayDelay_ = 0.0f;
 }
 
 void TitleScreen::update(const UpdateContext& ctx) {
     bgAnimTimer_ += ctx.dt;
+
+    if (titleMusicOk_) {
+        UpdateMusicStream(titleMusic_);
+        if (titleMusicPlaying_ && !IsMusicStreamPlaying(titleMusic_)) {
+            // Recreate stream after each pass to avoid MP3 decoder artifacts on seek/restart.
+            unloadTitleMusic();
+            titleReplayDelay_ = kTitleReplayDelaySec;
+        }
+    }
+
+    if (!titleMusicPlaying_ && titleReplayDelay_ > 0.0f) {
+        titleReplayDelay_ -= ctx.dt;
+        if (titleReplayDelay_ <= 0.0f) {
+            titleReplayDelay_ = 0.0f;
+            if (loadTitleMusic()) startTitleMusic();
+        }
+    }
 
     auto st = ctx.input->state();
     bool clickedTap = tapButton_.update(
@@ -59,6 +89,39 @@ void TitleScreen::update(const UpdateContext& ctx) {
         ctx.app->replace(std::make_unique<MenuMainScreen>());
         ctx.app->playSfx("sounds/MenuSelect.wav");
     }
+}
+
+bool TitleScreen::loadTitleMusic() {
+    unloadTitleMusic();
+
+    std::string musicPath = Assets::A(kTitleMusicRel);
+    if (!FileExists(musicPath.c_str())) return false;
+
+    titleMusic_ = LoadMusicStream(musicPath.c_str());
+    titleMusicOk_ = (titleMusic_.ctxData != nullptr);
+    if (!titleMusicOk_) {
+        titleMusic_ = {};
+        return false;
+    }
+
+    SetMusicVolume(titleMusic_, 0.9f);
+    return true;
+}
+
+void TitleScreen::unloadTitleMusic() {
+    if (titleMusicOk_) {
+        StopMusicStream(titleMusic_);
+        UnloadMusicStream(titleMusic_);
+    }
+    titleMusic_ = {};
+    titleMusicOk_ = false;
+    titleMusicPlaying_ = false;
+}
+
+void TitleScreen::startTitleMusic() {
+    if (!titleMusicOk_) return;
+    PlayMusicStream(titleMusic_);
+    titleMusicPlaying_ = true;
 }
 
 void TitleScreen::draw(const DrawContext& ctx) {
