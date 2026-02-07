@@ -41,7 +41,7 @@ void TitleScreen::onEnter() {
     bgAnimTimer_ = 0.0f;
 
     tapButton_ = {};
-    tapButton_.rect = {11.0f, 339.0f, 218.0f, 26.0f};
+    tapButton_.rect = {11.0f, 319.0f, 218.0f, 26.0f};
     tapButton_.bgRel = ResolvePath(kTapIdlePrimary, kTapIdleFallback);
     tapButton_.bgRelActive = ResolvePath(kTapActivePrimary, kTapActiveFallback);
 
@@ -126,7 +126,7 @@ void TitleScreen::startTitleMusic() {
 
 void TitleScreen::draw(const DrawContext& ctx) {
     int vw = ctx.vs ? ctx.vs->vw : 240;
-    int vh = ctx.vs ? ctx.vs->vh : 400;
+    int vh = ctx.vs ? ctx.vs->vh : 360;
     int frame = ((int)(bgAnimTimer_ * kBgAnimFps)) % kBgFrameCount;
 
     ClearBackground(BLACK);

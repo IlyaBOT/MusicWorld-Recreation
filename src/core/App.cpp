@@ -5,7 +5,7 @@ IScreen* App::top() { return stack_.empty() ? nullptr : stack_.back().get(); }
 
 void App::init() {
     std::filesystem::create_directories("save");
-    vs.init(240, 400);
+    vs.init(240, 360);
     assets.init();
     InitAudioDevice();
 
@@ -69,6 +69,6 @@ void App::runOneFrame() {
         DrawText(TextFormat("x=%.1f y=%.1f swipe=%d", st.mouseV.x, st.mouseV.y, (int)st.swipe), 4, 18, 12, Fade(RAYWHITE, 0.85f));
     }
 
-    toast.draw(240, 400, debug);
+    toast.draw(vs.vw, vs.vh, debug);
     vs.end();
 }

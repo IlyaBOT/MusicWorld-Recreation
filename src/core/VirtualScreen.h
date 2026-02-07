@@ -3,7 +3,7 @@
 
 struct VirtualScreen {
     int vw = 240;
-    int vh = 400;
+    int vh = 360;
 
     RenderTexture2D target{};
     Rectangle dstRect{};

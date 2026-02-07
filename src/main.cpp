@@ -5,7 +5,7 @@
 
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(900, 600, "Music World - Recreation (skeleton)");
+    InitWindow(480, 720, "Music World - Recreation");
     SetTargetFPS(60);
 
     App app;

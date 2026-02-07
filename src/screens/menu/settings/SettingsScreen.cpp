@@ -68,7 +68,7 @@ void SettingsScreen::update(const UpdateContext& ctx) {
 }
 
 void SettingsScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
 
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0052.png").tex;
     DrawTexture(title, 10, 18, WHITE);

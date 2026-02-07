@@ -23,10 +23,11 @@ void SplashScreen::draw(const DrawContext& ctx) {
     bool showLg = timer_ >= kCom2UsDurationSec;
     auto logo = ctx.assets->tex(showLg ? "sprites/UI/Title/lg.png" : "sprites/UI/Title/com2us.png").tex;
     DrawCentered(logo, 120, 200);
+    int textY = (ctx.vs ? ctx.vs->vh : 360) - 16;
     if (!logo.id || ctx.debug) {
         DrawTextCentered(showLg
             ? "LG Electronics (missing sprites/UI/Title/lg.png)"
             : "com2us (missing sprites/UI/Title/com2us.png)",
-            120, 360, 12, GRAY);
+            120, textY, 12, GRAY);
     }
 }

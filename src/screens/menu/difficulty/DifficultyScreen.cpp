@@ -41,7 +41,7 @@ void DifficultyScreen::update(const UpdateContext& ctx) {
 }
 
 void DifficultyScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
 
     if (mode_ == "free") {
         auto t = ctx.assets->tex("sprites/UI/Menu/Russian/0055.png").tex;
