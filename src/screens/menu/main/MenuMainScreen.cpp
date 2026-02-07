@@ -29,12 +29,12 @@ static ui::SpriteButton makeItem(float y, const std::string& labelRel) {
 
 void MenuMainScreen::onEnter() {
     items_.clear();
-    items_.push_back(makeItem(122, "sprites/UI/Menu/Russian/game-btn.png")); // Game
-    items_.push_back(makeItem(162, "sprites/UI/Menu/Russian/player-btn.png")); // Player
-    items_.push_back(makeItem(202, "sprites/UI/Menu/Russian/help-btn.png")); // Help
-    items_.push_back(makeItem(242, "sprites/UI/Menu/Russian/settings-btn.png")); // Settings
-    items_.push_back(makeItem(282, "sprites/UI/Menu/Russian/records-btn.png")); // Records
-    items_.push_back(makeItem(322, "sprites/UI/Menu/Russian/exit-btn.png")); // Exit
+    items_.push_back(makeItem(86, "sprites/UI/Menu/Russian/game-btn.png")); // Game
+    items_.push_back(makeItem(126, "sprites/UI/Menu/Russian/player-btn.png")); // Player
+    items_.push_back(makeItem(166, "sprites/UI/Menu/Russian/help-btn.png")); // Help
+    items_.push_back(makeItem(206, "sprites/UI/Menu/Russian/settings-btn.png")); // Settings
+    items_.push_back(makeItem(246, "sprites/UI/Menu/Russian/records-btn.png")); // Records
+    items_.push_back(makeItem(286, "sprites/UI/Menu/Russian/exit-btn.png")); // Exit
 }
 
 void MenuMainScreen::update(const UpdateContext& ctx) {

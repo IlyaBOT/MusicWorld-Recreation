@@ -138,7 +138,7 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
 
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0049.png").tex;
-    DrawTexture(title, 10, 18, WHITE);
+    DrawTexture(title, 4, 4, WHITE);
 
     Rectangle card = { 30, 90, 180, 190 };
     DrawRectangleRounded(card, 0.12f, 8, Fade(BLACK, 0.25f));

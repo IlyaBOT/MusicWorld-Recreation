@@ -7,13 +7,13 @@
 #include <memory>
 
 void ModeSelectScreen::onEnter() {
-    dj_.rect = { 20, 105, 100, 100 };
-    story_.rect = { 120, 105, 100, 100 };
-    free_.rect = { 20, 210, 100, 100 };
-    party_.rect = { 120, 210, 100, 100 };
+    dj_.rect = { 20, 85, 100, 100 };
+    story_.rect = { 120, 85, 100, 100 };
+    free_.rect = { 20, 190, 100, 100 };
+    party_.rect = { 120, 190, 100, 100 };
 
-    dj_.bgRel = story_.bgRel = free_.bgRel = party_.bgRel = "sprites/UI/Menu/Buttons/1384.png";
-    dj_.bgRelActive = story_.bgRelActive = free_.bgRelActive = party_.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
+    dj_.bgRel = story_.bgRel = free_.bgRel = party_.bgRel = "sprites/UI/Menu/Buttons/1385.png";
+    dj_.bgRelActive = story_.bgRelActive = free_.bgRelActive = party_.bgRelActive = "sprites/UI/Menu/Buttons/1387.png";
     SetupMenuBackButton(back_);
 }
 
@@ -46,16 +46,16 @@ void ModeSelectScreen::update(const UpdateContext& ctx) {
     }
 }
 
-static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const std::string& iconRel, const std::string& textRel, bool locked) {
+static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const std::string& iconRel, const std::string& textRel, const std::string& textRelActive, bool locked) {
     b.draw(*ctx.assets);
 
     auto icon = ctx.assets->tex(iconRel).tex;
-    if (icon.id) {
+    if (!locked && icon.id) {
         float cx = b.rect.x + b.rect.width/2;
         float cy = b.rect.y + b.rect.height/2 - 6;
         DrawTexture(icon, (int)(cx - icon.width/2), (int)(cy - icon.height/2), WHITE);
     }
-    auto txt = ctx.assets->tex(textRel).tex;
+    auto txt = ctx.assets->tex((b.hovered || b.pressed) ? textRelActive : textRel).tex;
     if (txt.id) {
         float cx = b.rect.x + b.rect.width/2;
         float y = b.rect.y + b.rect.height - 12;
@@ -71,27 +71,31 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
 void ModeSelectScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
     auto title = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Russian/gamemode-title.png", "sprites/UI/Menu/Russian/0058.png")).tex;
-    DrawTexture(title, 10, 18, WHITE);
+    DrawTexture(title, 4, 4, WHITE);
 
     drawBubble(ctx,
         dj_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/djmode.png", "sprites/UI/Menu/Buttons/1224.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/djmode-btn.png", "sprites/UI/Menu/Russian/0053.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/djmode-btn.png", "sprites/UI/Menu/Russian/0053.png")),
         false);
     drawBubble(ctx,
         story_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/history.png", "sprites/UI/Menu/Buttons/1225.png"),
-        ResolveSpritePath("sprites/UI/Menu/Russian/start-btn.png", "sprites/UI/Menu/Russian/0017.png"),
+        ResolveSpritePath("sprites/UI/Menu/Russian/history-btn.png", "sprites/UI/Menu/Russian/0017.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/history-btn.png", "sprites/UI/Menu/Russian/0017.png")),
         false);
     drawBubble(ctx,
         free_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/freemode.png", "sprites/UI/Menu/Buttons/1226.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/freemode-btn.png", "sprites/UI/Menu/Russian/0055.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/freemode-btn.png", "sprites/UI/Menu/Russian/0055.png")),
         false);
     drawBubble(ctx,
         party_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/crazymode.png", "sprites/UI/Menu/Buttons/1227.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/crazymode-btn.png", "sprites/UI/Menu/Russian/0054.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/crazymode-btn.png", "sprites/UI/Menu/Russian/0054.png")),
         !ctx.profile->storyCompleted);
     back_.draw(*ctx.assets);
 

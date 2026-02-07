@@ -15,11 +15,11 @@ void DifficultyScreen::onEnter() {
     SetupMenuBackButton(back_);
 }
 
-static void drawDiffRow(const DrawContext& ctx, const ui::SpriteButton& b, const std::string& iconRel, const std::string& textRel, bool locked) {
+static void drawDiffRow(const DrawContext& ctx, const ui::SpriteButton& b, const std::string& iconRel, const std::string& textRel, const std::string& textRelActive, bool locked) {
     b.draw(*ctx.assets);
     auto icon = ctx.assets->tex(iconRel).tex;
-    if (icon.id) DrawTexture(icon, (int)(b.rect.x + 28), (int)(b.rect.y + (b.rect.height-icon.height)/2), WHITE);
-    auto txt = ctx.assets->tex(textRel).tex;
+    if (!locked && icon.id) DrawTexture(icon, (int)(b.rect.x + 28), (int)(b.rect.y + (b.rect.height-icon.height)/2), WHITE);
+    auto txt = ctx.assets->tex((b.hovered || b.pressed) ? textRelActive : textRel).tex;
     if (txt.id) DrawTexture(txt, (int)(b.rect.x + 90), (int)(b.rect.y + (b.rect.height-txt.height)/2 + 8), WHITE);
     if (locked) {
         auto lock = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Buttons/lock.png", "sprites/UI/Menu/Buttons/1353.png")).tex;
@@ -47,26 +47,29 @@ void DifficultyScreen::draw(const DrawContext& ctx) {
 
     if (mode_ == "free") {
         auto t = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Russian/freemode-btn.png", "sprites/UI/Menu/Russian/0055.png")).tex;
-        DrawTexture(t, 10, 24, WHITE);
+        DrawTexture(t, 4, 4, WHITE);
     } else {
         auto t = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Russian/start-btn.png", "sprites/UI/Menu/Russian/0017.png")).tex;
-        DrawTexture(t, 10, 24, WHITE);
+        DrawTexture(t, 4, 4, WHITE);
     }
 
     drawDiffRow(ctx,
         easy_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/easy.png", "sprites/UI/Menu/Buttons/1234.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/easy-btn.png", "sprites/UI/Menu/Russian/0024.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/easy-btn.png", "sprites/UI/Menu/Russian/0024.png")),
         false);
     drawDiffRow(ctx,
         med_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/medium.png", "sprites/UI/Menu/Buttons/1235.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/medium-btn.png", "sprites/UI/Menu/Russian/0025.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/medium-btn.png", "sprites/UI/Menu/Russian/0025.png")),
         false);
     drawDiffRow(ctx,
         hard_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/hard.png", "sprites/UI/Menu/Buttons/1236.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/hard-btn.png", "sprites/UI/Menu/Russian/0026.png"),
+        ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/hard-btn.png", "sprites/UI/Menu/Russian/0026.png")),
         !ctx.profile->storyCompleted);
     back_.draw(*ctx.assets);
 

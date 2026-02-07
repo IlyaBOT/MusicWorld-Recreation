@@ -45,7 +45,7 @@ static void drawModeRow(const DrawContext& ctx, const ui::SpriteButton& b, const
 void ModeScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0050.png").tex;
-    DrawTexture(title, 10, 18, WHITE);
+    DrawTexture(title, 4, 4, WHITE);
     drawModeRow(ctx, story, "sprites/UI/Menu/Russian/0017.png", false);
     drawModeRow(ctx, free,  "sprites/UI/Menu/Russian/0055.png", false);
     drawModeRow(ctx, party, "sprites/UI/Menu/Russian/0054.png", !ctx.profile->storyCompleted);
@@ -91,7 +91,7 @@ static void drawDiffRow(const DrawContext& ctx, const ui::SpriteButton& b, const
 void DifficultyScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0050.png").tex;
-    DrawTexture(title, 10, 18, WHITE);
+    DrawTexture(title, 4, 4, WHITE);
     DrawTextCentered("Difficulty", 120, 118, 14, RAYWHITE);
     drawDiffRow(ctx, easy, "sprites/UI/Menu/Russian/0024.png", false);
     drawDiffRow(ctx, med,  "sprites/UI/Menu/Russian/0025.png", false);
@@ -145,7 +145,7 @@ static const char* gradeFor(int score) {
 void RecordsScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0050.png").tex;
-    DrawTexture(title, 10, 18, WHITE);
+    DrawTexture(title, 4, 4, WHITE);
 
     Rectangle card = { 30, 90, 180, 190 };
     DrawRectangleRounded(card, 0.12f, 8, Fade(BLACK, 0.25f));
