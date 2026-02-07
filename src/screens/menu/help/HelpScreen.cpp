@@ -66,7 +66,7 @@ void HelpScreen::draw(const DrawContext& ctx) {
 
     Rectangle card = { 20, 90, 200, 200 };
     DrawRectangleRounded(card, 0.10f, 8, Fade(BLACK, 0.22f));
-    DrawRectangleRoundedLines(card, 0.10f, 8, 2.0f, Fade(RAYWHITE, 0.35f));
+    DrawRectangleRoundedLinesEx(card, 0.10f, 8, 2.0f, Fade(RAYWHITE, 0.35f));
 
     auto page = ctx.assets->tex(pages_[idx_]).tex;
     if (page.id) DrawCentered(page, card.x + card.width/2, card.y + card.height/2);

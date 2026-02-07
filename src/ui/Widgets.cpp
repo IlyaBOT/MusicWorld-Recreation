@@ -24,7 +24,7 @@ void Toast::draw(int vw, int vh, bool debug) const {
     int y = vh - boxH - 20;
 
     DrawRectangleRounded({(float)x,(float)y,(float)boxW,(float)boxH}, 0.25f, 8, Fade(BLACK, 0.7f * alpha));
-    DrawRectangleRoundedLines({(float)x,(float)y,(float)boxW,(float)boxH}, 0.25f, 8, 2.0f, Fade(RAYWHITE, 0.35f * alpha));
+    DrawRectangleRoundedLinesEx({(float)x,(float)y,(float)boxW,(float)boxH}, 0.25f, 8, 2.0f, Fade(RAYWHITE, 0.35f * alpha));
     DrawText(text.c_str(), x+12, y+14, 16, Fade(RAYWHITE, alpha));
 
     if (debug) DrawText("TOAST", x+boxW-60, y+4, 12, Fade(YELLOW, alpha));
@@ -60,7 +60,7 @@ void SpriteButton::draw(Assets& assets) const {
         drawCentered(t, rect, tint);
     } else {
         DrawRectangleRounded(rect, 0.2f, 6, Fade(DARKPURPLE, enabled ? 0.9f : 0.4f));
-        DrawRectangleRoundedLines(rect, 0.2f, 6, 2.0f, Fade(RAYWHITE, 0.35f));
+        DrawRectangleRoundedLinesEx(rect, 0.2f, 6, 2.0f, Fade(RAYWHITE, 0.35f));
     }
 
     if (!labelRel.empty()) {

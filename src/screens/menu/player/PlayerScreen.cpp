@@ -140,7 +140,7 @@ void PlayerScreen::draw(const DrawContext& ctx) {
 
     Rectangle card = { 30, 90, 180, 190 };
     DrawRectangleRounded(card, 0.12f, 8, Fade(BLACK, 0.25f));
-    DrawRectangleRoundedLines(card, 0.12f, 8, 2.0f, Fade(RAYWHITE, 0.35f));
+    DrawRectangleRoundedLinesEx(card, 0.12f, 8, 2.0f, Fade(RAYWHITE, 0.35f));
 
     const auto& t = tracks_[idx_];
 
