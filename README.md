@@ -1,5 +1,30 @@
 # MusicWorld Recreation
 
+## Table of Contents
+
+<details>
+
+   <summary>Contents</summary>
+
+1. [Project progress](#project-progress)
+1. [Controls](#controls)
+1. [Build on Windows (Visual Studio)](#build-on-windows-visual-studio)
+   1. [Requirements:](#requirements)
+   1. [Build and run in PowerShell:](#build-and-run-in-powershell)
+1. [Build on macOS](#build-on-macos)
+   1. [Requirements:](#requirements)
+   1. [Build:](#build)
+   1. [Run:](#run)
+1. [Build on Linux](#build-on-linux)
+   1. [Requirements](#requirements)
+      1. [Ubuntu / Debian](#ubuntu--debian)
+      1. [Fedora](#fedora)
+      1. [Arch Linux](#arch-linux)
+   1. [Build](#build)
+   1. [Run](#run)
+
+</details>
+
 Music World recreation for Android, iOS and PC, using C++17 + raylib + CMake.
 Runs on macOS, Linux and Windows only right now. Mobile support will be added later.
 
@@ -48,7 +73,7 @@ cmake --build build --config Release
 
 ### Build:
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --fresh -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ```
 
@@ -80,7 +105,7 @@ sudo pacman -S --needed base-devel git cmake alsa-lib mesa libx11 libxrandr libx
 
 ### Build
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release +cmake --build build -j
+cmake --fresh -S . -B build -DCMAKE_BUILD_TYPE=Release +cmake --build build -j
 ```
 
 ### Run
