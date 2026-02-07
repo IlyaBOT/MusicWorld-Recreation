@@ -8,7 +8,7 @@ public:
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
 private:
-    ui::SpriteButton vibToggle_{};
+    ui::SpriteButton vibToggle_{}, back_{};
     Rectangle sliderNotes_{};
     Rectangle sliderSound_{};
     bool draggingNotes_ = false;

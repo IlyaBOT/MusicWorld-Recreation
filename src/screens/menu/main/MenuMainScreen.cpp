@@ -8,13 +8,22 @@
 #include "screens/menu/settings/SettingsScreen.h"
 #include "screens/menu/records/RecordsFlow.h"
 #include <memory>
+#include <string>
 
 static ui::SpriteButton makeItem(float y, const std::string& labelRel) {
+    auto labelSelected = [&]() {
+        constexpr const char* kExt = ".png";
+        if (labelRel.size() <= 4 || labelRel.rfind(kExt) != labelRel.size() - 4) return labelRel;
+        std::string candidate = labelRel.substr(0, labelRel.size() - 4) + "_selected.png";
+        return FileExists(Assets::A(candidate).c_str()) ? candidate : labelRel;
+    };
+
     ui::SpriteButton b;
     b.rect = { 22, y, 196, 36 };
     b.bgRel = "sprites/UI/Menu/Buttons/1359.png";
     b.bgRelActive = "sprites/UI/Menu/Buttons/1363.png";
     b.labelRel = labelRel;
+    b.labelRelActive = labelSelected();
     return b;
 }
 

@@ -1,5 +1,6 @@
 #include "screens/menu/help/HelpScreen.h"
 #include "core/App.h"
+#include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
 #include "core/DrawUtil.h"
 #include <filesystem>
@@ -35,11 +36,13 @@ void HelpScreen::onEnter() {
     btnPrev_.bgRel = "sprites/UI/Menu/Buttons/1404.png";
     btnNext_.bgRel = "sprites/UI/Menu/Buttons/1411.png";
     carousel_.speed = 8.5f;
+    SetupMenuBackButton(back_);
 }
 
 void HelpScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
-    if (st.keyBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
+    if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
     carousel_.update(ctx.dt);
 
@@ -53,7 +56,6 @@ void HelpScreen::update(const UpdateContext& ctx) {
     if (st.swipe == SwipeDir::Left) step(+1);
     if (st.swipe == SwipeDir::Right) step(-1);
 
-    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (click(btnPrev_)) step(-1);
     if (click(btnNext_)) step(+1);
 }
@@ -77,7 +79,8 @@ void HelpScreen::draw(const DrawContext& ctx) {
 
     btnPrev_.draw(*ctx.assets);
     btnNext_.draw(*ctx.assets);
+    back_.draw(*ctx.assets);
 
     DrawText(TextFormat("%d/%d", idx_+1, (int)pages_.size()), 110, 292, 14, RAYWHITE);
-    if (ctx.debug) DrawText("HelpScreen", 6, 384, 12, YELLOW);
+    if (ctx.debug) DrawText("HelpScreen", 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
 }

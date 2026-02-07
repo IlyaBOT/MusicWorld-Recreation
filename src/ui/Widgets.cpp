@@ -53,10 +53,11 @@ bool SpriteButton::update(Vector2 p, bool down, bool pressedEvt, bool releasedEv
 
 void SpriteButton::draw(Assets& assets) const {
     Color tint = enabled ? WHITE : Fade(WHITE, 0.45f);
+    bool active = (hovered || pressed);
 
     if (!bgRel.empty()) {
         Texture2D t = assets.tex(bgRel).tex;
-        if (!bgRelActive.empty() && (hovered || pressed)) t = assets.tex(bgRelActive).tex;
+        if (!bgRelActive.empty() && active) t = assets.tex(bgRelActive).tex;
         drawCentered(t, rect, tint);
     } else {
         DrawRectangleRounded(rect, 0.2f, 6, Fade(DARKPURPLE, enabled ? 0.9f : 0.4f));
@@ -64,7 +65,9 @@ void SpriteButton::draw(Assets& assets) const {
     }
 
     if (!labelRel.empty()) {
-        drawCentered(assets.tex(labelRel).tex, rect, tint);
+        Texture2D t = assets.tex(labelRel).tex;
+        if (!labelRelActive.empty() && active) t = assets.tex(labelRelActive).tex;
+        drawCentered(t, rect, tint);
     }
 }
 

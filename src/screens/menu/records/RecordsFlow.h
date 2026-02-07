@@ -9,7 +9,7 @@ struct ModeScreen : public IScreen {
     void onEnter() override;
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
-    ui::SpriteButton story{}, free{}, party{};
+    ui::SpriteButton story{}, free{}, party{}, back{};
 };
 
 struct DifficultyScreen : public IScreen {
@@ -18,7 +18,7 @@ struct DifficultyScreen : public IScreen {
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
     std::string mode;
-    ui::SpriteButton easy{}, med{}, hard{};
+    ui::SpriteButton easy{}, med{}, hard{}, back{};
 };
 
 struct RecordsScreen : public IScreen {
@@ -29,7 +29,7 @@ struct RecordsScreen : public IScreen {
     std::string mode;
     std::string diff;
     int level = 1;
-    ui::SpriteButton btnPrev{}, btnNext{};
+    ui::SpriteButton btnPrev{}, btnNext{}, back{};
     ui::Carousel carousel{};
 };
 

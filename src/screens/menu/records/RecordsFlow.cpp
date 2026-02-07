@@ -1,5 +1,6 @@
 #include "screens/menu/records/RecordsFlow.h"
 #include "core/App.h"
+#include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
 #include "core/DrawUtil.h"
 #include <memory>
@@ -13,12 +14,13 @@ void ModeScreen::onEnter() {
     party.rect = { 20, 275, 200, 60 };
     story.bgRel = free.bgRel = party.bgRel = "sprites/UI/Menu/Buttons/1384.png";
     story.bgRelActive = free.bgRelActive = party.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
+    SetupMenuBackButton(back);
 }
 
 void ModeScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
-    if (st.keyBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
+    if (st.keyBack || click(back)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
     if (click(story)) { ctx.app->playSfx("sounds/MenuSelect.wav"); ctx.app->push(std::make_unique<DifficultyScreen>("story")); return; }
     if (click(free))  { ctx.app->playSfx("sounds/MenuSelect.wav"); ctx.app->push(std::make_unique<DifficultyScreen>("free")); return; }
@@ -47,6 +49,7 @@ void ModeScreen::draw(const DrawContext& ctx) {
     drawModeRow(ctx, story, "sprites/UI/Menu/Russian/0017.png", false);
     drawModeRow(ctx, free,  "sprites/UI/Menu/Russian/0055.png", false);
     drawModeRow(ctx, party, "sprites/UI/Menu/Russian/0054.png", !ctx.profile->storyCompleted);
+    back.draw(*ctx.assets);
     DrawTextCentered("Choose mode", 120, 110, 12, Fade(RAYWHITE, 0.8f));
 }
 
@@ -57,12 +60,13 @@ void DifficultyScreen::onEnter() {
     hard.rect = { 20, 285, 200, 60 };
     easy.bgRel = med.bgRel = hard.bgRel = "sprites/UI/Menu/Buttons/1384.png";
     easy.bgRelActive = med.bgRelActive = hard.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
+    SetupMenuBackButton(back);
 }
 
 void DifficultyScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
-    if (st.keyBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
+    if (st.keyBack || click(back)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
     if (click(easy)) { ctx.app->playSfx("sounds/MenuSelect.wav"); ctx.app->push(std::make_unique<RecordsScreen>(mode, "easy")); return; }
     if (click(med))  { ctx.app->playSfx("sounds/MenuSelect.wav"); ctx.app->push(std::make_unique<RecordsScreen>(mode, "med")); return; }
@@ -92,6 +96,7 @@ void DifficultyScreen::draw(const DrawContext& ctx) {
     drawDiffRow(ctx, easy, "sprites/UI/Menu/Russian/0024.png", false);
     drawDiffRow(ctx, med,  "sprites/UI/Menu/Russian/0025.png", false);
     drawDiffRow(ctx, hard, "sprites/UI/Menu/Russian/0026.png", !ctx.profile->storyCompleted);
+    back.draw(*ctx.assets);
 }
 
 // RecordsScreen
@@ -100,13 +105,15 @@ void RecordsScreen::onEnter() {
     btnNext.rect = { 170, 310, 40, 40 };
     btnPrev.bgRel = "sprites/UI/Menu/Buttons/1404.png";
     btnNext.bgRel = "sprites/UI/Menu/Buttons/1411.png";
+    SetupMenuBackButton(back);
     carousel.speed = 8.5f;
     level = 1;
 }
 
 void RecordsScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
-    if (st.keyBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
+    if (st.keyBack || click(back)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
     carousel.update(ctx.dt);
 
     auto step = [&](int dir){
@@ -122,7 +129,6 @@ void RecordsScreen::update(const UpdateContext& ctx) {
     if (st.swipe == SwipeDir::Left) step(+1);
     if (st.swipe == SwipeDir::Right) step(-1);
 
-    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (click(btnPrev)) step(-1);
     if (click(btnNext)) step(+1);
 }
@@ -155,5 +161,6 @@ void RecordsScreen::draw(const DrawContext& ctx) {
 
     btnPrev.draw(*ctx.assets);
     btnNext.draw(*ctx.assets);
+    back.draw(*ctx.assets);
 }
 } // namespace RecordsFlow

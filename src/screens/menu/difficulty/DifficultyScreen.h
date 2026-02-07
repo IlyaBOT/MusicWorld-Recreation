@@ -11,5 +11,5 @@ public:
     void draw(const DrawContext& ctx) override;
 private:
     std::string mode_;
-    ui::SpriteButton easy_{}, med_{}, hard_{};
+    ui::SpriteButton easy_{}, med_{}, hard_{}, back_{};
 };

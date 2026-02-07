@@ -1,6 +1,8 @@
 #include "screens/menu/mode/ModeSelectScreen.h"
 #include "core/App.h"
+#include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
+#include "screens/menu/SpritePath.h"
 #include "screens/menu/difficulty/DifficultyScreen.h"
 #include <memory>
 
@@ -12,13 +14,14 @@ void ModeSelectScreen::onEnter() {
 
     dj_.bgRel = story_.bgRel = free_.bgRel = party_.bgRel = "sprites/UI/Menu/Buttons/1384.png";
     dj_.bgRelActive = story_.bgRelActive = free_.bgRelActive = party_.bgRelActive = "sprites/UI/Menu/Buttons/1384.png";
+    SetupMenuBackButton(back_);
 }
 
 void ModeSelectScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
 
-    if (st.keyBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+    if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
     if (click(dj_)) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
@@ -59,7 +62,7 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
         DrawTexture(txt, (int)(cx - txt.width/2), (int)(y), WHITE);
     }
     if (locked) {
-        auto lock = ctx.assets->tex("sprites/UI/Menu/Buttons/1353.png").tex;
+        auto lock = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Buttons/lock.png", "sprites/UI/Menu/Buttons/1353.png")).tex;
         if (lock.id) DrawTexture(lock, (int)(b.rect.x + b.rect.width/2 - lock.width/2), (int)(b.rect.y + b.rect.height/2 - lock.height/2), WHITE);
         else DrawText("LOCK", (int)b.rect.x + 34, (int)b.rect.y + 44, 16, RED);
     }
@@ -67,13 +70,30 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
 
 void ModeSelectScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
-    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0058.png").tex;
+    auto title = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Russian/gamemode-title.png", "sprites/UI/Menu/Russian/0058.png")).tex;
     DrawTexture(title, 10, 18, WHITE);
 
-    drawBubble(ctx, dj_,    "sprites/UI/Menu/Buttons/1224.png", "sprites/UI/Menu/Russian/0053.png", false);
-    drawBubble(ctx, story_, "sprites/UI/Menu/Buttons/1225.png", "sprites/UI/Menu/Russian/0017.png", false);
-    drawBubble(ctx, free_,  "sprites/UI/Menu/Buttons/1226.png", "sprites/UI/Menu/Russian/0055.png", false);
-    drawBubble(ctx, party_, "sprites/UI/Menu/Buttons/1227.png", "sprites/UI/Menu/Russian/0054.png", !ctx.profile->storyCompleted);
+    drawBubble(ctx,
+        dj_,
+        ResolveSpritePath("sprites/UI/Menu/Buttons/djmode.png", "sprites/UI/Menu/Buttons/1224.png"),
+        ResolveSpritePath("sprites/UI/Menu/Russian/djmode-btn.png", "sprites/UI/Menu/Russian/0053.png"),
+        false);
+    drawBubble(ctx,
+        story_,
+        ResolveSpritePath("sprites/UI/Menu/Buttons/history.png", "sprites/UI/Menu/Buttons/1225.png"),
+        ResolveSpritePath("sprites/UI/Menu/Russian/start-btn.png", "sprites/UI/Menu/Russian/0017.png"),
+        false);
+    drawBubble(ctx,
+        free_,
+        ResolveSpritePath("sprites/UI/Menu/Buttons/freemode.png", "sprites/UI/Menu/Buttons/1226.png"),
+        ResolveSpritePath("sprites/UI/Menu/Russian/freemode-btn.png", "sprites/UI/Menu/Russian/0055.png"),
+        false);
+    drawBubble(ctx,
+        party_,
+        ResolveSpritePath("sprites/UI/Menu/Buttons/crazymode.png", "sprites/UI/Menu/Buttons/1227.png"),
+        ResolveSpritePath("sprites/UI/Menu/Russian/crazymode-btn.png", "sprites/UI/Menu/Russian/0054.png"),
+        !ctx.profile->storyCompleted);
+    back_.draw(*ctx.assets);
 
-    if (ctx.debug) DrawText("ModeSelectScreen", 6, 384, 12, YELLOW);
+    if (ctx.debug) DrawText("ModeSelectScreen", 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
 }

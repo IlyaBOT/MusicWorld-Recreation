@@ -1,6 +1,7 @@
 #include "screens/menu/player/PlayerScreen.h"
 #include "core/App.h"
 #include "core/DrawUtil.h"
+#include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
 #include <filesystem>
 #include <algorithm>
@@ -78,6 +79,7 @@ void PlayerScreen::onEnter() {
     btnPrev_.bgRel = "sprites/UI/Menu/Buttons/1404.png";
     btnNext_.bgRel = "sprites/UI/Menu/Buttons/1411.png";
     btnPlay_.bgRel = "sprites/UI/Menu/Buttons/1319.png";
+    SetupMenuBackButton(back_);
 
     carousel_.speed = 8.5f;
 
@@ -95,7 +97,8 @@ void PlayerScreen::onExit() {
 
 void PlayerScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
-    if (st.keyBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
+    if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
     if (musicOk_) UpdateMusicStream(music_);
     carousel_.update(ctx.dt);
@@ -111,7 +114,6 @@ void PlayerScreen::update(const UpdateContext& ctx) {
     if (st.swipe == SwipeDir::Left) step(+1);
     if (st.swipe == SwipeDir::Right) step(-1);
 
-    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (click(btnPrev_)) step(-1);
     if (click(btnNext_)) step(+1);
 
@@ -158,6 +160,7 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     btnNext_.draw(*ctx.assets);
     btnPlay_.bgRel = playing_ ? "sprites/UI/Menu/Buttons/1320.png" : "sprites/UI/Menu/Buttons/1319.png";
     btnPlay_.draw(*ctx.assets);
+    back_.draw(*ctx.assets);
 
-    if (ctx.debug) DrawText(TextFormat("tracks=%d idx=%d", (int)tracks_.size(), idx_), 6, 384, 12, YELLOW);
+    if (ctx.debug) DrawText(TextFormat("tracks=%d idx=%d", (int)tracks_.size(), idx_), 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
 }
