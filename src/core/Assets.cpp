@@ -1,4 +1,5 @@
 #include "core/Assets.h"
+#include <string_view>
 
 namespace {
 constexpr Color kChromaGreen = {0x1f, 0x8f, 0x20, 0xff};
@@ -54,6 +55,12 @@ Texture2D LoadTextureWithChromaKey(const std::string& path) {
     UnloadImage(img);
     return t;
 }
+
+bool IsBackgroundTexturePath(std::string_view relPath) {
+    if (relPath.rfind("sprites/LevelBackgrounds/", 0) == 0) return true;
+    if (relPath == "sprites/UI/background_half.png") return true;
+    return false;
+}
 }
 
 void Assets::init() {
@@ -90,8 +97,12 @@ TextureHandle Assets::tex(const std::string& relPath) {
     TextureHandle h{};
     std::string path = A(relPath);
     if (FileExists(path.c_str())) {
-        h.tex = LoadTextureWithChromaKey(path);
-        if (h.tex.id == 0) h.tex = LoadTexture(path.c_str());
+        if (IsBackgroundTexturePath(relPath)) {
+            h.tex = LoadTexture(path.c_str());
+        } else {
+            h.tex = LoadTextureWithChromaKey(path);
+            if (h.tex.id == 0) h.tex = LoadTexture(path.c_str());
+        }
         h.ok = (h.tex.id != 0);
         if (h.ok) SetTextureFilter(h.tex, TEXTURE_FILTER_POINT);
     }

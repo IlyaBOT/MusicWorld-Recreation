@@ -108,13 +108,13 @@ static TrackBgLayout trackBackgroundLayout(int trackIndex) {
     case 0: return {"sprites/LevelBackgrounds/0580.png", 0.0f, -20.0f, kZoomTight};
     case 1: return {"sprites/LevelBackgrounds/0581.png", 81.0f, 62.0f, kZoomTight};
     case 2: return {"sprites/LevelBackgrounds/0581.png", 32.0f, 3.0f, kZoomTight};
-    case 3: return {"sprites/LevelBackgrounds/0582.png", -18.0f, 12.0f, kZoomDefault};
-    case 4: return {"sprites/LevelBackgrounds/0583.png", 10.0f, 60.0f, 1.0f};
-    case 5: return {"sprites/LevelBackgrounds/0583.png", 52.0f, 26.0f, kZoomTight};
-    case 6: return {"sprites/LevelBackgrounds/0584.png", 0.0f, -8.0f, kZoomDefault};
-    case 7: return {"sprites/LevelBackgrounds/0584.png", -42.0f, -34.0f, kZoomTight};
-    case 8: return {"sprites/LevelBackgrounds/0585.png", 44.0f, 26.0f, kZoomTight};
-    case 9: return {"sprites/LevelBackgrounds/0586.png", 8.0f, -18.0f, kZoomTight};
+    case 3: return {"sprites/LevelBackgrounds/0582.png", 41.0f, -112.0f, 1.0f};
+    case 4: return {"sprites/LevelBackgrounds/0583.png", 17.0f, 59.0f, 1.0f};
+    case 5: return {"sprites/LevelBackgrounds/0583.png", 3.0f, -73.0f, 1.0f};
+    case 6: return {"sprites/LevelBackgrounds/0584.png", 1.0f, -85.0f, 1.0f};
+    case 7: return {"sprites/LevelBackgrounds/0585.png", -42.0f, -34.0f, kZoomTight};
+    case 8: return {"sprites/LevelBackgrounds/0585.png", 7.0f, -111.0f, 1.0f};
+    case 9: return {"sprites/LevelBackgrounds/0586.png", 33.0f, -22.0f, 1.0f};
     default: return {nullptr, 0.0f, 0.0f, kZoomDefault};
     }
 }
@@ -467,7 +467,7 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/player-title.png").tex;
     DrawTexture(title, 4, 4, WHITE);
 
-    Rectangle card = { kPlayerCardX, 90, 180, 190 };
+    Rectangle card = { kPlayerCardX, 82, 180, 190 };
     DrawRectangleRounded(card, 0.12f, 8, Fade(BLACK, 0.25f));
     DrawRectangleRoundedLinesEx(card, 0.12f, 8, 2.0f, Fade(RAYWHITE, 0.35f));
 
@@ -475,7 +475,7 @@ void PlayerScreen::draw(const DrawContext& ctx) {
 
     Rectangle coverFrame = {
         card.x + (card.width - kTrackCoverFrameSize) * 0.5f,
-        card.y + kTrackCoverTopInset - 2.0f,
+        card.y + kTrackCoverTopInset - 6.0f,
         kTrackCoverFrameSize,
         kTrackCoverFrameSize
     };
@@ -507,11 +507,22 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     drawCounterSprites(ctx, tailTrackText, counterX + currentW + betweenGap, counterY, playerCounterLegacyGlyph);
 
     auto name = ctx.assets->tex(t.namePngRel).tex;
-    float nameY = playerWindow.y + playerWindow.height + 18.0f;
+    float nameY = playerWindow.y + playerWindow.height + 22.0f;
     if (name.id) DrawCentered(name, card.x + card.width / 2, nameY);
     else DrawTextCentered(t.titleText.c_str(), (int)(card.x + card.width / 2), (int)(nameY - 5), 12, RAYWHITE);
 
-    drawEq(ctx, card.x + 20, card.y + 146);
+    const float eqX = card.x + 20.0f;
+    const float eqY = card.y + 146.0f;
+    auto eqSeg = ctx.assets->tex("sprites/UI/Menu/Buttons/1323.png").tex;
+    if (eqSeg.id) {
+        const float eqW = 10.0f * (float)eqSeg.width + 9.0f;
+        const float eqH = (float)eqSeg.height + 12.0f;
+        Rectangle eqBg = {eqX - 6.0f, eqY - 4.0f, eqW + 12.0f, eqH + 8.0f};
+        const float eqRoundness = std::min(1.0f, 12.0f / std::min(eqBg.width, eqBg.height));
+        DrawRectangleRounded(eqBg, eqRoundness, 8, Fade(BLACK, 0.28f));
+        DrawRectangleRoundedLinesEx(eqBg, eqRoundness, 8, 1.0f, Fade(RAYWHITE, 0.22f));
+    }
+    drawEq(ctx, eqX, eqY);
 
     btnPrev_.draw(*ctx.assets);
     btnNext_.draw(*ctx.assets);
