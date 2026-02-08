@@ -39,19 +39,23 @@ void ModeSelectScreen::update(const UpdateContext& ctx) {
 
     if (st.keyBack || backClicked) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
+    DifficultyScreen::Target diffTarget = (target_ == Target::Records)
+        ? DifficultyScreen::Target::Records
+        : DifficultyScreen::Target::Gameplay;
+
     if (djClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
-        ctx.app->push(std::make_unique<DifficultyScreen>("dj"));
+        ctx.app->push(std::make_unique<DifficultyScreen>("dj", diffTarget));
         return;
     }
     if (storyClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
-        ctx.app->push(std::make_unique<DifficultyScreen>("story"));
+        ctx.app->push(std::make_unique<DifficultyScreen>("story", diffTarget));
         return;
     }
     if (freeClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
-        ctx.app->push(std::make_unique<DifficultyScreen>("free"));
+        ctx.app->push(std::make_unique<DifficultyScreen>("free", diffTarget));
         return;
     }
     if (partyClicked) {

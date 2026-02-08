@@ -6,7 +6,6 @@
 #include "screens/menu/player/PlayerScreen.h"
 #include "screens/menu/help/HelpScreen.h"
 #include "screens/menu/settings/SettingsScreen.h"
-#include "screens/menu/records/RecordsFlow.h"
 #include <memory>
 #include <string>
 
@@ -53,7 +52,7 @@ void MenuMainScreen::update(const UpdateContext& ctx) {
             if (i == 1) ctx.app->push(std::make_unique<PlayerScreen>());
             if (i == 2) ctx.app->push(std::make_unique<HelpScreen>());
             if (i == 3) ctx.app->push(std::make_unique<SettingsScreen>());
-            if (i == 4) ctx.app->push(std::make_unique<RecordsFlow::ModeScreen>());
+            if (i == 4) ctx.app->push(std::make_unique<ModeSelectScreen>(ModeSelectScreen::Target::Records));
             if (i == 5) ctx.app->requestQuit();
             return;
         }

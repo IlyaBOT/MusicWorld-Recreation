@@ -4,11 +4,58 @@
 #include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
+#include <limits>
 
 namespace {
 constexpr float kTrackCoverSize = 64.0f;
 constexpr float kTrackCoverTopInset = 14.0f;
+constexpr float kPlayerCardX = 24.0f;
+
+struct TrackOrderEntry {
+    const char* key;
+    int rank;
+    const char* nameRel;
+};
+
+static constexpr TrackOrderEntry kTrackOrder[] = {
+    {"MorningDew", 0, "sprites/UI/Menu/Russian/tracks/morning-dew.png"},
+    {"Picnic", 1, "sprites/UI/Menu/Russian/tracks/picnic.png"},
+    {"KissOfFlowercula", 2, "sprites/UI/Menu/Russian/tracks/kiss-of-flowercula.png"},
+    {"JungleDrum", 3, "sprites/UI/Menu/Russian/tracks/jungle-drum.png"},
+    {"WorshipTheWild", 4, "sprites/UI/Menu/Russian/tracks/worship-the-wild.png"},
+    {"Kongga_sDance", 5, "sprites/UI/Menu/Russian/tracks/konggas-dance.png"},
+    {"FutureCity", 6, "sprites/UI/Menu/Russian/tracks/future-city.png"},
+    {"ElectricalParade", 7, "sprites/UI/Menu/Russian/tracks/electrical-parade.png"},
+    {"SpaceInvader", 8, "sprites/UI/Menu/Russian/tracks/space-invader.png"},
+    {"PrinceShutter", 9, "sprites/UI/Menu/Russian/tracks/prince-shutter.png"},
+};
+
+int extractTrackNumberPrefix(const std::string& s) {
+    int value = 0;
+    bool any = false;
+    for (char ch : s) {
+        if (!std::isdigit((unsigned char)ch)) break;
+        any = true;
+        value = value * 10 + (ch - '0');
+    }
+    return any ? value : std::numeric_limits<int>::max();
+}
+
+int desiredTrackRank(const std::string& filename) {
+    for (const auto& entry : kTrackOrder) {
+        if (filename.find(entry.key) != std::string::npos) return entry.rank;
+    }
+    return std::numeric_limits<int>::max();
+}
+
+const char* desiredTrackNameRel(const std::string& filename) {
+    for (const auto& entry : kTrackOrder) {
+        if (filename.find(entry.key) != std::string::npos) return entry.nameRel;
+    }
+    return nullptr;
+}
 }
 
 static std::vector<std::string> listAudio(const std::string& dir) {
@@ -22,7 +69,16 @@ static std::vector<std::string> listAudio(const std::string& dir) {
         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
         if (ext == ".mp3" || ext == ".ogg" || ext == ".wav") out.push_back(p.filename().string());
     }
-    std::sort(out.begin(), out.end());
+    std::sort(out.begin(), out.end(), [](const std::string& a, const std::string& b) {
+        int ra = desiredTrackRank(a);
+        int rb = desiredTrackRank(b);
+        if (ra != rb) return ra < rb;
+
+        int na = extractTrackNumberPrefix(a);
+        int nb = extractTrackNumberPrefix(b);
+        if (na != nb) return na < nb;
+        return a < b;
+    });
     return out;
 }
 
@@ -37,15 +93,15 @@ static TrackBgLayout trackBackgroundLayout(int trackIndex) {
     constexpr float kZoomDefault = 1.0f;
     constexpr float kZoomTight = 1.5f;
     switch (trackIndex) {
-    case 0: return {"sprites/LevelBackgrounds/0585.png", 0.0f, -20.0f, kZoomTight};
-    case 1: return {"sprites/LevelBackgrounds/0580.png", -54.0f, -30.0f, kZoomTight};
-    case 2: return {"sprites/LevelBackgrounds/0580.png", 56.0f, 18.0f, kZoomTight};
-    case 3: return {"sprites/LevelBackgrounds/0581.png", -18.0f, 12.0f, kZoomDefault};
-    case 4: return {"sprites/LevelBackgrounds/0582.png", -60.0f, -22.0f, kZoomTight};
-    case 5: return {"sprites/LevelBackgrounds/0582.png", 52.0f, 26.0f, kZoomTight};
-    case 6: return {"sprites/LevelBackgrounds/0583.png", 0.0f, -8.0f, kZoomDefault};
+    case 0: return {"sprites/LevelBackgrounds/0580.png", 0.0f, -20.0f, kZoomTight};
+    case 1: return {"sprites/LevelBackgrounds/0581.png", -54.0f, -30.0f, kZoomTight};
+    case 2: return {"sprites/LevelBackgrounds/0581.png", 56.0f, 18.0f, kZoomTight};
+    case 3: return {"sprites/LevelBackgrounds/0582.png", -18.0f, 12.0f, kZoomDefault};
+    case 4: return {"sprites/LevelBackgrounds/0583.png", -60.0f, -22.0f, kZoomTight};
+    case 5: return {"sprites/LevelBackgrounds/0583.png", 52.0f, 26.0f, kZoomTight};
+    case 6: return {"sprites/LevelBackgrounds/0584.png", 0.0f, -8.0f, kZoomDefault};
     case 7: return {"sprites/LevelBackgrounds/0584.png", -42.0f, -34.0f, kZoomTight};
-    case 8: return {"sprites/LevelBackgrounds/0584.png", 44.0f, 26.0f, kZoomTight};
+    case 8: return {"sprites/LevelBackgrounds/0585.png", 44.0f, 26.0f, kZoomTight};
     case 9: return {"sprites/LevelBackgrounds/0586.png", 8.0f, -18.0f, kZoomTight};
     default: return {nullptr, 0.0f, 0.0f, kZoomDefault};
     }
@@ -142,10 +198,11 @@ void PlayerScreen::scanTracks() {
         Track t;
         t.fileRel = std::string("music/levels/") + fn;
 
-        int nameId = 100 + (n - 1);
-        char buf[64];
-        snprintf(buf, sizeof(buf), "sprites/UI/Menu/Russian/%04d.png", nameId);
-        t.namePngRel = buf;
+        if (const char* mappedName = desiredTrackNameRel(fn)) {
+            t.namePngRel = mappedName;
+        } else {
+            t.namePngRel.clear();
+        }
 
         char ibuf[64];
         snprintf(ibuf, sizeof(ibuf), "sprites/player/trackicon_%02d.png", n);
@@ -157,7 +214,7 @@ void PlayerScreen::scanTracks() {
     if (tracks_.empty()) {
         Track t;
         t.fileRel = "music/levels/01-Example.mp3";
-        t.namePngRel = "sprites/UI/Menu/Russian/0100.png";
+        t.namePngRel = "sprites/UI/Menu/Russian/tracks/morning-dew.png";
         t.iconRel = "sprites/player/trackicon_01.png";
         t.titleText = "No tracks in assets/music/levels/";
         tracks_.push_back(t);
@@ -295,10 +352,10 @@ static void drawEq(const DrawContext& ctx, float x, float y) {
 void PlayerScreen::draw(const DrawContext& ctx) {
     DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
 
-    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0049.png").tex;
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/player-title.png").tex;
     DrawTexture(title, 4, 4, WHITE);
 
-    Rectangle card = { 30, 90, 180, 190 };
+    Rectangle card = { kPlayerCardX, 90, 180, 190 };
     DrawRectangleRounded(card, 0.12f, 8, Fade(BLACK, 0.25f));
     DrawRectangleRoundedLinesEx(card, 0.12f, 8, 2.0f, Fade(RAYWHITE, 0.35f));
 
