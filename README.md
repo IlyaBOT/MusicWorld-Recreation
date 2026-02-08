@@ -61,7 +61,7 @@ Runs on macOS, Linux and Windows only right now. Mobile support will be added la
 ```powershell
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
-.\build\Release\mw_recreation.exe
+build\Release\mw_recreation.exe
 ```
 
 ---

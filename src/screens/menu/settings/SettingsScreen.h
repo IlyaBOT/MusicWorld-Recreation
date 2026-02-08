@@ -8,9 +8,26 @@ public:
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
 private:
-    ui::SpriteButton vibToggle_{}, back_{};
+    void rebuildLayout();
+    float calcMaxScroll(int viewportHeight) const;
+
+    ui::SpriteButton btnVibOn_{}, btnVibOff_{}, back_{};
+    Rectangle vibroPanel_{};
+    Rectangle volumePanel_{};
+    Rectangle notesPanel_{};
+    Rectangle soundPanel_{};
+    Rectangle sliderVolume_{};
     Rectangle sliderNotes_{};
     Rectangle sliderSound_{};
+    bool draggingVolume_ = false;
     bool draggingNotes_ = false;
     bool draggingSound_ = false;
+    bool vibroActive_ = false;
+    bool volumeActive_ = false;
+    bool notesActive_ = false;
+    bool soundActive_ = false;
+    float scrollY_ = 0.0f;
+    float maxScrollY_ = 0.0f;
+    bool draggingScrollbar_ = false;
+    float scrollbarGrabOffsetY_ = 0.0f;
 };

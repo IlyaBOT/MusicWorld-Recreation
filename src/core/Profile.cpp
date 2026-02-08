@@ -1,9 +1,14 @@
 #include "core/Profile.h"
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
 static bool toBool(const std::string& v) {
     return v == "1" || v == "true" || v == "yes" || v == "on";
+}
+
+static int clampi(int v, int lo, int hi) {
+    return std::max(lo, std::min(hi, v));
 }
 
 void Profile::load(const std::string& path) {
@@ -19,6 +24,7 @@ void Profile::load(const std::string& path) {
 
         if (k == "storyCompleted") storyCompleted = toBool(v);
         else if (k == "vibration") vibration = toBool(v);
+        else if (k == "masterVolume") masterVolume = clampi(std::stoi(v), 0, 100);
         else if (k == "syncNotes") syncNotes = std::stoi(v);
         else if (k == "syncSound") syncSound = std::stoi(v);
         else if (k.rfind("score.", 0) == 0) {
@@ -33,6 +39,7 @@ void Profile::save(const std::string& path) const {
     f << "# MusicWorld-Recreation profile\n";
     f << "storyCompleted=" << (storyCompleted ? "1" : "0") << "\n";
     f << "vibration=" << (vibration ? "1" : "0") << "\n";
+    f << "masterVolume=" << clampi(masterVolume, 0, 100) << "\n";
     f << "syncNotes=" << syncNotes << "\n";
     f << "syncSound=" << syncSound << "\n";
     for (auto& kv : scores) {

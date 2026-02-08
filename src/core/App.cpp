@@ -1,4 +1,5 @@
 #include "core/App.h"
+#include <algorithm>
 #include <filesystem>
 
 IScreen* App::top() { return stack_.empty() ? nullptr : stack_.back().get(); }
@@ -10,6 +11,7 @@ void App::init() {
     InitAudioDevice();
 
     profile.load(profilePath_);
+    SetMasterVolume(std::max(0.0f, std::min(1.0f, profile.masterVolume / 100.0f)));
     lastTime_ = (float)GetTime();
     quitRequested_ = false;
 }
