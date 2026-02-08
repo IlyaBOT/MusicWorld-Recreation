@@ -42,6 +42,8 @@ public:
     bool quitRequested() const;
 
     void playSfx(const std::string& rel);
+    void requestMenuMusic();
+    std::string resolveMusicRel(const std::string& rel) const;
     void saveProfile();
 
     VirtualScreen vs;
@@ -56,6 +58,13 @@ private:
     float lastTime_ = 0.0f;
     std::string profilePath_ = "save/profile.cfg";
     bool quitRequested_ = false;
+    bool menuMusicKeepAlive_ = false;
+    ::Music menuMusic_{};
+    bool menuMusicOk_ = false;
+    bool menuMusicPlaying_ = false;
+    bool menuMusicRemixState_ = false;
 
     IScreen* top();
+    void updateMenuMusic();
+    void unloadMenuMusic();
 };

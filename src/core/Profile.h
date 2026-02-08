@@ -6,6 +6,8 @@ struct Profile {
     bool storyCompleted = false;
 
     bool vibration = true;
+    bool musicEnabled = true;
+    bool musicRemix = false;
     int masterVolume = 100; // 0..100
     int syncNotes = 0;   // -2..+2
     int syncSound = 0;   // -400..+400

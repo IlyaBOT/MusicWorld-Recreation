@@ -16,8 +16,11 @@ private:
     bool titleMusicOk_ = false;
     bool titleMusicPlaying_ = false;
     float titleReplayDelay_ = 0.0f;
+    bool titleMusicDirty_ = true;
+    bool titleMusicRemixState_ = false;
 
-    bool loadTitleMusic();
+    bool loadTitleMusic(const std::string& rel);
     void unloadTitleMusic();
     void startTitleMusic();
+    void ensureTitleMusic(const UpdateContext& ctx);
 };

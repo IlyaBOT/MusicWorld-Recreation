@@ -50,15 +50,20 @@ void TitleScreen::onEnter() {
     titleMusicOk_ = false;
     titleMusicPlaying_ = false;
     titleReplayDelay_ = 0.0f;
-    if (loadTitleMusic()) startTitleMusic();
+    titleMusicDirty_ = true;
+    titleMusicRemixState_ = false;
 }
 
 void TitleScreen::onExit() {
     unloadTitleMusic();
     titleReplayDelay_ = 0.0f;
+    titleMusicDirty_ = true;
+    titleMusicRemixState_ = false;
 }
 
 void TitleScreen::update(const UpdateContext& ctx) {
+    ensureTitleMusic(ctx);
+
     bgAnimTimer_ += ctx.dt;
     int vh = ctx.vs ? ctx.vs->vh : 400;
     tapButton_.rect.y = (float)vh - kTapBottomMarginPx - tapButton_.rect.height;
@@ -69,6 +74,7 @@ void TitleScreen::update(const UpdateContext& ctx) {
             // Recreate stream after each pass to avoid MP3 decoder artifacts on seek/restart.
             unloadTitleMusic();
             titleReplayDelay_ = kTitleReplayDelaySec;
+            titleMusicDirty_ = true;
         }
     }
 
@@ -76,7 +82,7 @@ void TitleScreen::update(const UpdateContext& ctx) {
         titleReplayDelay_ -= ctx.dt;
         if (titleReplayDelay_ <= 0.0f) {
             titleReplayDelay_ = 0.0f;
-            if (loadTitleMusic()) startTitleMusic();
+            titleMusicDirty_ = true;
         }
     }
 
@@ -94,10 +100,36 @@ void TitleScreen::update(const UpdateContext& ctx) {
     }
 }
 
-bool TitleScreen::loadTitleMusic() {
+void TitleScreen::ensureTitleMusic(const UpdateContext& ctx) {
+    bool musicEnabled = !ctx.profile || ctx.profile->musicEnabled;
+    if (!musicEnabled) {
+        if (titleMusicOk_) unloadTitleMusic();
+        titleReplayDelay_ = 0.0f;
+        titleMusicDirty_ = true;
+        return;
+    }
+
+    bool wantRemix = ctx.profile && ctx.profile->musicRemix;
+    if (titleMusicOk_ && wantRemix != titleMusicRemixState_) {
+        unloadTitleMusic();
+        titleReplayDelay_ = 0.0f;
+        titleMusicDirty_ = true;
+    }
+
+    if (!titleMusicDirty_ || titleReplayDelay_ > 0.0f) return;
+    std::string rel = ctx.app ? ctx.app->resolveMusicRel(kTitleMusicRel) : kTitleMusicRel;
+
+    if (loadTitleMusic(rel)) {
+        startTitleMusic();
+        titleMusicRemixState_ = wantRemix;
+        titleMusicDirty_ = false;
+    }
+}
+
+bool TitleScreen::loadTitleMusic(const std::string& rel) {
     unloadTitleMusic();
 
-    std::string musicPath = Assets::A(kTitleMusicRel);
+    std::string musicPath = Assets::A(rel);
     if (!FileExists(musicPath.c_str())) return false;
 
     titleMusic_ = LoadMusicStream(musicPath.c_str());

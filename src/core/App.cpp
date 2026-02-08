@@ -1,6 +1,7 @@
 #include "core/App.h"
 #include <algorithm>
 #include <filesystem>
+#include <string_view>
 
 IScreen* App::top() { return stack_.empty() ? nullptr : stack_.back().get(); }
 
@@ -19,6 +20,7 @@ void App::init() {
 void App::shutdown() {
     saveProfile();
     while (!stack_.empty()) pop();
+    unloadMenuMusic();
     CloseAudioDevice();
     assets.shutdown();
     vs.shutdown();
@@ -64,7 +66,9 @@ void App::runOneFrame() {
     DrawContext d{&vs, &assets, &profile, &toast, debug};
 
     toast.update(dt);
+    menuMusicKeepAlive_ = false;
     if (top()) top()->update(u);
+    updateMenuMusic();
 
     vs.begin();
     if (top()) top()->draw(d);
@@ -78,4 +82,68 @@ void App::runOneFrame() {
 
     toast.draw(vs.vw, vs.vh, debug);
     vs.end();
+}
+
+void App::requestMenuMusic() {
+    menuMusicKeepAlive_ = true;
+}
+
+std::string App::resolveMusicRel(const std::string& rel) const {
+    constexpr std::string_view kRemixPrefix = "music/remix/";
+    constexpr std::string_view kBasePrefix = "music/";
+    if (!profile.musicRemix) return rel;
+    if (rel.rfind(kRemixPrefix.data(), 0) == 0) return rel;
+    if (rel.rfind(kBasePrefix.data(), 0) != 0) return rel;
+
+    std::string candidate = std::string(kRemixPrefix) + rel.substr(kBasePrefix.size());
+    if (FileExists(Assets::A(candidate).c_str())) return candidate;
+    return rel;
+}
+
+void App::updateMenuMusic() {
+    if (!profile.musicEnabled) {
+        unloadMenuMusic();
+        return;
+    }
+
+    bool wantRemix = profile.musicRemix;
+    if (!menuMusicKeepAlive_) {
+        unloadMenuMusic();
+        return;
+    }
+
+    if (!menuMusicOk_ || wantRemix != menuMusicRemixState_) {
+        unloadMenuMusic();
+        std::string rel = resolveMusicRel("music/menu.mp3");
+        std::string path = Assets::A(rel);
+        if (FileExists(path.c_str())) {
+            menuMusic_ = LoadMusicStream(path.c_str());
+            menuMusicOk_ = (menuMusic_.ctxData != nullptr);
+            if (menuMusicOk_) {
+                menuMusic_.looping = true;
+                SetMusicVolume(menuMusic_, 0.9f);
+                menuMusicRemixState_ = wantRemix;
+            } else {
+                menuMusic_ = {};
+            }
+        }
+    }
+
+    if (menuMusicOk_) {
+        UpdateMusicStream(menuMusic_);
+        if (!menuMusicPlaying_) {
+            PlayMusicStream(menuMusic_);
+            menuMusicPlaying_ = true;
+        }
+    }
+}
+
+void App::unloadMenuMusic() {
+    if (menuMusicOk_) {
+        StopMusicStream(menuMusic_);
+        UnloadMusicStream(menuMusic_);
+    }
+    menuMusic_ = {};
+    menuMusicOk_ = false;
+    menuMusicPlaying_ = false;
 }

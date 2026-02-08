@@ -51,6 +51,8 @@ static void drawDiffBubble(const DrawContext& ctx, const ui::SpriteButton& b, co
 }
 
 void DifficultyScreen::update(const UpdateContext& ctx) {
+    if (ctx.app) ctx.app->requestMenuMusic();
+
     auto st = ctx.input->state();
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
 

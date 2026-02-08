@@ -24,6 +24,8 @@ void Profile::load(const std::string& path) {
 
         if (k == "storyCompleted") storyCompleted = toBool(v);
         else if (k == "vibration") vibration = toBool(v);
+        else if (k == "musicEnabled") musicEnabled = toBool(v);
+        else if (k == "musicRemix") musicRemix = toBool(v);
         else if (k == "masterVolume") masterVolume = clampi(std::stoi(v), 0, 100);
         else if (k == "syncNotes") syncNotes = std::stoi(v);
         else if (k == "syncSound") syncSound = std::stoi(v);
@@ -39,6 +41,8 @@ void Profile::save(const std::string& path) const {
     f << "# MusicWorld-Recreation profile\n";
     f << "storyCompleted=" << (storyCompleted ? "1" : "0") << "\n";
     f << "vibration=" << (vibration ? "1" : "0") << "\n";
+    f << "musicEnabled=" << (musicEnabled ? "1" : "0") << "\n";
+    f << "musicRemix=" << (musicRemix ? "1" : "0") << "\n";
     f << "masterVolume=" << clampi(masterVolume, 0, 100) << "\n";
     f << "syncNotes=" << syncNotes << "\n";
     f << "syncSound=" << syncSound << "\n";

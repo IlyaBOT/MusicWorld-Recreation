@@ -40,6 +40,8 @@ void HelpScreen::onEnter() {
 }
 
 void HelpScreen::update(const UpdateContext& ctx) {
+    if (ctx.app) ctx.app->requestMenuMusic();
+
     auto st = ctx.input->state();
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }

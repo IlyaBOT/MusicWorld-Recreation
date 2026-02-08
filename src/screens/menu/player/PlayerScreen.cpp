@@ -52,7 +52,7 @@ void PlayerScreen::scanTracks() {
     }
 }
 
-void PlayerScreen::loadTrack(int i) {
+void PlayerScreen::loadTrack(const UpdateContext& ctx, int i) {
     if (i < 0 || i >= (int)tracks_.size()) return;
 
     if (musicOk_) {
@@ -61,13 +61,36 @@ void PlayerScreen::loadTrack(int i) {
         musicOk_ = false;
     }
 
-    std::string path = Assets::A(tracks_[i].fileRel);
+    std::string rel = tracks_[i].fileRel;
+    if (ctx.app) rel = ctx.app->resolveMusicRel(rel);
+    std::string path = Assets::A(rel);
     if (FileExists(path.c_str())) {
         music_ = LoadMusicStream(path.c_str());
         musicOk_ = (music_.ctxData != nullptr);
         if (musicOk_) SetMusicVolume(music_, 0.9f);
     }
     playing_ = false;
+}
+
+void PlayerScreen::ensureTrackLoaded(const UpdateContext& ctx) {
+    bool musicEnabled = !ctx.profile || ctx.profile->musicEnabled;
+    bool wantRemix = ctx.profile && ctx.profile->musicRemix;
+    if (!musicEnabled) {
+        if (musicOk_) {
+            StopMusicStream(music_);
+            UnloadMusicStream(music_);
+            musicOk_ = false;
+        }
+        playing_ = false;
+        trackDirty_ = true;
+        remixState_ = wantRemix;
+        return;
+    }
+
+    if (!trackDirty_ && wantRemix == remixState_) return;
+    trackDirty_ = false;
+    remixState_ = wantRemix;
+    loadTrack(ctx, idx_);
 }
 
 void PlayerScreen::onEnter() {
@@ -84,7 +107,9 @@ void PlayerScreen::onEnter() {
     carousel_.speed = 8.5f;
 
     idx_ = 0;
-    loadTrack(idx_);
+    trackDirty_ = true;
+    remixState_ = false;
+    playing_ = false;
 }
 
 void PlayerScreen::onExit() {
@@ -100,6 +125,7 @@ void PlayerScreen::update(const UpdateContext& ctx) {
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
+    ensureTrackLoaded(ctx);
     if (musicOk_) UpdateMusicStream(music_);
     carousel_.update(ctx.dt);
 
@@ -107,7 +133,7 @@ void PlayerScreen::update(const UpdateContext& ctx) {
         if (carousel_.animating()) return;
         idx_ = (idx_ + dir + (int)tracks_.size()) % (int)tracks_.size();
         carousel_.start(dir);
-        loadTrack(idx_);
+        trackDirty_ = true;
         ctx.app->playSfx("sounds/MenuSwitch.wav");
     };
 
@@ -118,11 +144,14 @@ void PlayerScreen::update(const UpdateContext& ctx) {
     if (click(btnNext_)) step(+1);
 
     if (click(btnPlay_)) {
+        if (ctx.profile && !ctx.profile->musicEnabled) { ctx.toast->show("Music disabled in Settings"); return; }
         if (!musicOk_) { ctx.toast->show("Missing audio file"); return; }
         if (!playing_) { PlayMusicStream(music_); playing_ = true; }
         else { PauseMusicStream(music_); playing_ = false; }
         ctx.app->playSfx("sounds/MenuSelect.wav");
     }
+
+    if (!playing_ && ctx.app) ctx.app->requestMenuMusic();
 }
 
 static void drawEq(const DrawContext& ctx, float x, float y) {

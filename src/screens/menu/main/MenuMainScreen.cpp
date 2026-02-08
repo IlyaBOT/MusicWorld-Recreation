@@ -39,6 +39,8 @@ void MenuMainScreen::onEnter() {
 }
 
 void MenuMainScreen::update(const UpdateContext& ctx) {
+    if (ctx.app) ctx.app->requestMenuMusic();
+
     auto st = ctx.input->state();
     Vector2 hitPoint = st.mouseV;
     hitPoint.y += 4.0f;

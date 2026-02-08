@@ -19,6 +19,8 @@ void ModeScreen::onEnter() {
 }
 
 void ModeScreen::update(const UpdateContext& ctx) {
+    if (ctx.app) ctx.app->requestMenuMusic();
+
     auto st = ctx.input->state();
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (st.keyBack || click(back)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
@@ -66,6 +68,8 @@ void RecordsScreen::onEnter() {
 }
 
 void RecordsScreen::update(const UpdateContext& ctx) {
+    if (ctx.app) ctx.app->requestMenuMusic();
+
     auto st = ctx.input->state();
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (st.keyBack || click(back)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }

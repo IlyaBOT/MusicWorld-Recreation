@@ -20,6 +20,8 @@ constexpr float kPanelW = 224.0f;
 constexpr float kPanelStartY = 54.0f;
 constexpr float kPanelGap = 6.0f;
 constexpr float kVibroPanelH = 86.0f;
+constexpr float kMusicPanelH = 86.0f;
+constexpr float kRemixPanelH = 86.0f;
 constexpr float kRowPanelH = 82.0f;
 constexpr float kNotesPanelH = 98.0f;
 constexpr float kSliderTrackInset = 8.0f;
@@ -40,6 +42,8 @@ constexpr float kScrollbarThumbWidth = 6.0f;
 constexpr float kScrollbarRadius = 6.0f;
 constexpr float kScrollbarThumbRadius = 8.0f;
 constexpr float kScrollbarMinThumbH = 20.0f;
+constexpr float kRemixDescOffsetY = 26.0f;
+constexpr float kRemixButtonsOffsetY = 46.0f;
 
 float sliderTrackStartX(Rectangle r) { return r.x + kSliderTrackInset + kSliderTrackOffsetX; }
 float sliderTrackEndX(Rectangle r) { return r.x + r.width - kSliderTrackInset - 1.0f + kSliderTrackOffsetX; }
@@ -100,6 +104,8 @@ static void drawRoundedRectPx(Rectangle r, float radiusPx, Color color) {
 
 float SettingsScreen::calcMaxScroll(int viewportHeight) const {
     float total = kVibroPanelH + kPanelGap
+        + kMusicPanelH + kPanelGap
+        + kRemixPanelH + kPanelGap
         + (kShowVolumePanel ? (kRowPanelH + kPanelGap) : 0.0f)
         + kNotesPanelH + kPanelGap + kRowPanelH;
     float visible = (float)viewportHeight - kPanelStartY - kContentBottomPad;
@@ -111,6 +117,12 @@ void SettingsScreen::rebuildLayout() {
     y -= scrollY_;
     vibroPanel_ = {kPanelX, y, kPanelW, kVibroPanelH};
     y += kVibroPanelH + kPanelGap;
+
+    musicPanel_ = {kPanelX, y, kPanelW, kMusicPanelH};
+    y += kMusicPanelH + kPanelGap;
+
+    remixPanel_ = {kPanelX, y, kPanelW, kRemixPanelH};
+    y += kRemixPanelH + kPanelGap;
 
     if (kShowVolumePanel) {
         volumePanel_ = {kPanelX, y, kPanelW, kRowPanelH};
@@ -129,6 +141,10 @@ void SettingsScreen::rebuildLayout() {
 
     btnVibOn_.rect = {vibroPanel_.x + 42, vibroPanel_.y + 36, 60, 31};
     btnVibOff_.rect = {vibroPanel_.x + 128, vibroPanel_.y + 36, 60, 31};
+    btnMusicOn_.rect = {musicPanel_.x + 42, musicPanel_.y + 36, 60, 31};
+    btnMusicOff_.rect = {musicPanel_.x + 128, musicPanel_.y + 36, 60, 31};
+    btnRemixOff_.rect = {remixPanel_.x + 42, remixPanel_.y + kRemixButtonsOffsetY, 60, 31};
+    btnRemixOn_.rect = {remixPanel_.x + 128, remixPanel_.y + kRemixButtonsOffsetY, 60, 31};
 }
 
 void SettingsScreen::onEnter() {
@@ -136,7 +152,7 @@ void SettingsScreen::onEnter() {
     maxScrollY_ = calcMaxScroll(kDefaultVirtualH);
     rebuildLayout();
     draggingVolume_ = draggingNotes_ = draggingSound_ = false;
-    vibroActive_ = volumeActive_ = notesActive_ = soundActive_ = false;
+    vibroActive_ = musicActive_ = remixActive_ = volumeActive_ = notesActive_ = soundActive_ = false;
     draggingScrollbar_ = false;
     scrollbarGrabOffsetY_ = 0.0f;
     SetupMenuBackButton(back_, 400);
@@ -292,6 +308,8 @@ static void drawScaleLabelsSprites(const DrawContext& ctx, Rectangle slider, con
 }
 
 void SettingsScreen::update(const UpdateContext& ctx) {
+    if (ctx.app) ctx.app->requestMenuMusic();
+
     auto st = ctx.input->state();
     int vw = ctx.vs ? ctx.vs->vw : kDefaultVirtualW;
     int vh = ctx.vs ? ctx.vs->vh : kDefaultVirtualH;
@@ -341,6 +359,28 @@ void SettingsScreen::update(const UpdateContext& ctx) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
         ctx.app->saveProfile();
     }
+    if (click(btnMusicOn_) && !ctx.profile->musicEnabled) {
+        ctx.profile->musicEnabled = true;
+        ctx.app->playSfx("sounds/MenuSelect.wav");
+        ctx.app->saveProfile();
+    }
+    if (click(btnMusicOff_) && ctx.profile->musicEnabled) {
+        ctx.profile->musicEnabled = false;
+        ctx.app->playSfx("sounds/MenuSelect.wav");
+        ctx.app->saveProfile();
+    }
+    if (ctx.profile) {
+        if (click(btnRemixOn_) && !ctx.profile->musicRemix) {
+            ctx.profile->musicRemix = true;
+            ctx.app->playSfx("sounds/MenuSelect.wav");
+            ctx.app->saveProfile();
+        }
+        if (click(btnRemixOff_) && ctx.profile->musicRemix) {
+            ctx.profile->musicRemix = false;
+            ctx.app->playSfx("sounds/MenuSelect.wav");
+            ctx.app->saveProfile();
+        }
+    }
 
     auto beginDrag = [&](Rectangle r, bool& dragging){
         if (st.pressed && inContent && CheckCollisionPointRec(st.mouseV, {r.x-10, r.y-10, r.width+20, r.height+20})) dragging = true;
@@ -379,6 +419,10 @@ void SettingsScreen::update(const UpdateContext& ctx) {
     }
 
     vibroActive_ = btnVibOn_.hovered || btnVibOn_.pressed || btnVibOff_.hovered || btnVibOff_.pressed;
+    musicActive_ = btnMusicOn_.hovered || btnMusicOn_.pressed || btnMusicOff_.hovered || btnMusicOff_.pressed
+        || (inContent && CheckCollisionPointRec(st.mouseV, musicPanel_));
+    remixActive_ = btnRemixOn_.hovered || btnRemixOn_.pressed || btnRemixOff_.hovered || btnRemixOff_.pressed
+        || (inContent && CheckCollisionPointRec(st.mouseV, remixPanel_));
     volumeActive_ = kShowVolumePanel && (draggingVolume_ || (inContent && CheckCollisionPointRec(st.mouseV, volumePanel_)));
     notesActive_ = draggingNotes_ || (inContent && CheckCollisionPointRec(st.mouseV, notesPanel_));
     soundActive_ = draggingSound_ || (inContent && CheckCollisionPointRec(st.mouseV, soundPanel_));
@@ -397,6 +441,8 @@ void SettingsScreen::draw(const DrawContext& ctx) {
     BeginScissorMode(0, clipY, vw, clipH);
 
     drawPanelFrame(vibroPanel_, vibroActive_);
+    drawPanelFrame(musicPanel_, musicActive_);
+    drawPanelFrame(remixPanel_, remixActive_);
     if (kShowVolumePanel) drawPanelFrame(volumePanel_, volumeActive_);
     drawPanelFrame(notesPanel_, notesActive_);
     drawPanelFrame(soundPanel_, soundActive_);
@@ -414,6 +460,39 @@ void SettingsScreen::draw(const DrawContext& ctx) {
         : "sprites/UI/Menu/Russian/off-btn_enabled.png").tex;
     DrawCentered(on, btnVibOn_.rect.x + btnVibOn_.rect.width * 0.5f, btnVibOn_.rect.y + btnVibOn_.rect.height * 0.5f);
     DrawCentered(off, btnVibOff_.rect.x + btnVibOff_.rect.width * 0.5f, btnVibOff_.rect.y + btnVibOff_.rect.height * 0.5f);
+
+    DrawText("Music", (int)(musicPanel_.x + kPanelTitleInsetX), (int)(musicPanel_.y + kPanelTitleInsetY), 16, WHITE);
+    const char* musicDesc = ctx.profile->musicEnabled ? "Music playback enabled" : "Music playback disabled";
+    DrawText(musicDesc, (int)(musicPanel_.x + kPanelTitleInsetX), (int)(musicPanel_.y + 26), 12, Fade(RAYWHITE, 0.85f));
+    auto musicOn = ctx.assets->tex(ctx.profile->musicEnabled
+        ? "sprites/UI/Menu/Russian/on-btn_enabled.png"
+        : "sprites/UI/Menu/Russian/on-btn_disabled.png").tex;
+    auto musicOff = ctx.assets->tex(ctx.profile->musicEnabled
+        ? "sprites/UI/Menu/Russian/off-btn_disabled.png"
+        : "sprites/UI/Menu/Russian/off-btn_enabled.png").tex;
+    DrawCentered(musicOn, btnMusicOn_.rect.x + btnMusicOn_.rect.width * 0.5f, btnMusicOn_.rect.y + btnMusicOn_.rect.height * 0.5f);
+    DrawCentered(musicOff, btnMusicOff_.rect.x + btnMusicOff_.rect.width * 0.5f, btnMusicOff_.rect.y + btnMusicOff_.rect.height * 0.5f);
+
+    DrawText("Music Remixes", (int)(remixPanel_.x + kPanelTitleInsetX), (int)(remixPanel_.y + kPanelTitleInsetY), 16, WHITE);
+    const char* remixDesc = ctx.profile->musicRemix
+        ? "Using assets/music/remix"
+        : "Using original soundtrack";
+    DrawText(remixDesc, (int)(remixPanel_.x + kPanelTitleInsetX), (int)(remixPanel_.y + kRemixDescOffsetY), 12, Fade(RAYWHITE, 0.85f));
+
+    auto origEnabled = ctx.assets->tex("sprites/UI/Menu/Buttons/orig-btn_enabled.png").tex;
+    auto origDisabled = ctx.assets->tex("sprites/UI/Menu/Buttons/orig-btn_disabledpdn.png").tex;
+    auto remixEnabled = ctx.assets->tex("sprites/UI/Menu/Buttons/remix-btn_enabled.png").tex;
+    auto remixDisabled = ctx.assets->tex("sprites/UI/Menu/Buttons/remix-btn_disabled.png").tex;
+    auto drawRemixBtn = [&](const ui::SpriteButton& btn, Texture2D enabledTex, Texture2D disabledTex, bool active){
+        auto tex = active ? enabledTex : disabledTex;
+        if (tex.id) DrawCentered(tex, btn.rect.x + btn.rect.width * 0.5f, btn.rect.y + btn.rect.height * 0.5f);
+        else {
+            Color c = active ? Color{167, 114, 255, 255} : Color{88, 54, 128, 255};
+            DrawRectangleRounded(btn.rect, 0.35f, 6, Fade(c, 0.8f));
+        }
+    };
+    drawRemixBtn(btnRemixOn_, remixEnabled, remixDisabled, ctx.profile->musicRemix);
+    drawRemixBtn(btnRemixOff_, origEnabled, origDisabled, !ctx.profile->musicRemix);
 
     if (kShowVolumePanel) {
         auto volTitle = ctx.assets->tex(volumeActive_

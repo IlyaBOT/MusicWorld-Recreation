@@ -11,8 +11,10 @@ private:
     void rebuildLayout();
     float calcMaxScroll(int viewportHeight) const;
 
-    ui::SpriteButton btnVibOn_{}, btnVibOff_{}, back_{};
+    ui::SpriteButton btnVibOn_{}, btnVibOff_{}, btnMusicOn_{}, btnMusicOff_{}, btnRemixOn_{}, btnRemixOff_{}, back_{};
     Rectangle vibroPanel_{};
+    Rectangle musicPanel_{};
+    Rectangle remixPanel_{};
     Rectangle volumePanel_{};
     Rectangle notesPanel_{};
     Rectangle soundPanel_{};
@@ -23,6 +25,8 @@ private:
     bool draggingNotes_ = false;
     bool draggingSound_ = false;
     bool vibroActive_ = false;
+    bool musicActive_ = false;
+    bool remixActive_ = false;
     bool volumeActive_ = false;
     bool notesActive_ = false;
     bool soundActive_ = false;

@@ -28,7 +28,10 @@ private:
     ::Music music_{};
     bool musicOk_ = false;
     bool playing_ = false;
+    bool trackDirty_ = true;
+    bool remixState_ = false;
 
     void scanTracks();
-    void loadTrack(int i);
+    void loadTrack(const UpdateContext& ctx, int i);
+    void ensureTrackLoaded(const UpdateContext& ctx);
 };
