@@ -4,49 +4,63 @@
 #include "screens/menu/MenuBg.h"
 #include "screens/menu/SpritePath.h"
 #include "screens/menu/difficulty/DifficultyScreen.h"
+#include <algorithm>
 #include <memory>
 
 void ModeSelectScreen::onEnter() {
-    dj_.rect = { 20, 85, 100, 100 };
-    story_.rect = { 120, 85, 100, 100 };
-    free_.rect = { 20, 190, 100, 100 };
-    party_.rect = { 120, 190, 100, 100 };
+    dj_.rect = { 11, 101, 100, 100 };
+    story_.rect = { 132, 101, 100, 100 };
+    free_.rect = { 11, 230, 100, 100 };
+    party_.rect = { 132, 230, 100, 100 };
 
     dj_.bgRel = story_.bgRel = free_.bgRel = party_.bgRel = "sprites/UI/Menu/Buttons/1385.png";
     dj_.bgRelActive = story_.bgRelActive = free_.bgRelActive = party_.bgRelActive = "sprites/UI/Menu/Buttons/1387.png";
-    SetupMenuBackButton(back_);
+    SetupMenuBackButton(back_, 400);
 }
 
 void ModeSelectScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
-    auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
+    Vector2 hitPoint = st.mouseV;
+    hitPoint.y += 4.0f;
+    auto click = [&](ui::SpriteButton& b){ return b.update(hitPoint, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
 
-    if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+    bool backClicked = click(back_);
+    bool djClicked = click(dj_);
+    bool storyClicked = click(story_);
+    bool freeClicked = click(free_);
+    bool partyClicked = click(party_);
+    bool partyLocked = !ctx.profile->storyCompleted;
+    if (partyLocked) {
+        party_.hovered = false;
+        party_.pressed = false;
+    }
 
-    if (click(dj_)) {
+    if (st.keyBack || backClicked) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+
+    if (djClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
-        ctx.toast->show("Under Construction");
+        ctx.app->push(std::make_unique<DifficultyScreen>("dj"));
         return;
     }
-    if (click(story_)) {
+    if (storyClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
         ctx.app->push(std::make_unique<DifficultyScreen>("story"));
         return;
     }
-    if (click(free_)) {
+    if (freeClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
         ctx.app->push(std::make_unique<DifficultyScreen>("free"));
         return;
     }
-    if (click(party_)) {
+    if (partyClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
-        if (!ctx.profile->storyCompleted) ctx.toast->show("Locked (finish Story)");
+        if (partyLocked) ctx.toast->show("Locked (finish Story)");
         else ctx.toast->show("Party mode WIP");
         return;
     }
 }
 
-static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const std::string& iconRel, const std::string& textRel, const std::string& textRelActive, bool locked) {
+static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const std::string& iconRel, const std::string& textRel, const std::string& textRelActive, bool locked, float textYOffset = 0.0f) {
     b.draw(*ctx.assets);
 
     auto icon = ctx.assets->tex(iconRel).tex;
@@ -58,8 +72,13 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
     auto txt = ctx.assets->tex((b.hovered || b.pressed) ? textRelActive : textRel).tex;
     if (txt.id) {
         float cx = b.rect.x + b.rect.width/2;
-        float y = b.rect.y + b.rect.height - 12;
-        DrawTexture(txt, (int)(cx - txt.width/2), (int)(y), WHITE);
+        float x = cx - txt.width/2;
+        float y = b.rect.y + b.rect.height - 28 + textYOffset;
+        int vw = ctx.vs ? ctx.vs->vw : 240;
+        int vh = ctx.vs ? ctx.vs->vh : 400;
+        x = std::max(0.0f, std::min(x, (float)(vw - txt.width)));
+        y = std::max(0.0f, std::min(y, (float)(vh - txt.height)));
+        DrawTexture(txt, (int)x, (int)y, WHITE);
     }
     if (locked) {
         auto lock = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Buttons/lock.png", "sprites/UI/Menu/Buttons/1353.png")).tex;
@@ -69,7 +88,7 @@ static void drawBubble(const DrawContext& ctx, const ui::SpriteButton& b, const 
 }
 
 void ModeSelectScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
     auto title = ctx.assets->tex(ResolveSpritePath("sprites/UI/Menu/Russian/gamemode-title.png", "sprites/UI/Menu/Russian/0058.png")).tex;
     DrawTexture(title, 4, 4, WHITE);
 
@@ -90,7 +109,8 @@ void ModeSelectScreen::draw(const DrawContext& ctx) {
         ResolveSpritePath("sprites/UI/Menu/Buttons/freemode.png", "sprites/UI/Menu/Buttons/1226.png"),
         ResolveSpritePath("sprites/UI/Menu/Russian/freemode-btn.png", "sprites/UI/Menu/Russian/0055.png"),
         ResolveSelectedSpritePath(ResolveSpritePath("sprites/UI/Menu/Russian/freemode-btn.png", "sprites/UI/Menu/Russian/0055.png")),
-        false);
+        false,
+        -8.0f);
     drawBubble(ctx,
         party_,
         ResolveSpritePath("sprites/UI/Menu/Buttons/crazymode.png", "sprites/UI/Menu/Buttons/1227.png"),
@@ -99,5 +119,5 @@ void ModeSelectScreen::draw(const DrawContext& ctx) {
         !ctx.profile->storyCompleted);
     back_.draw(*ctx.assets);
 
-    if (ctx.debug) DrawText("ModeSelectScreen", 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
+    if (ctx.debug) DrawText("ModeSelectScreen", 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

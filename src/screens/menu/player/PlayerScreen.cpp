@@ -79,7 +79,7 @@ void PlayerScreen::onEnter() {
     btnPrev_.bgRel = "sprites/UI/Menu/Buttons/1404.png";
     btnNext_.bgRel = "sprites/UI/Menu/Buttons/1411.png";
     btnPlay_.bgRel = "sprites/UI/Menu/Buttons/1319.png";
-    SetupMenuBackButton(back_);
+    SetupMenuBackButton(back_, 400);
 
     carousel_.speed = 8.5f;
 
@@ -135,7 +135,7 @@ static void drawEq(const DrawContext& ctx, float x, float y) {
 }
 
 void PlayerScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
 
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0049.png").tex;
     DrawTexture(title, 4, 4, WHITE);
@@ -162,5 +162,5 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     btnPlay_.draw(*ctx.assets);
     back_.draw(*ctx.assets);
 
-    if (ctx.debug) DrawText(TextFormat("tracks=%d idx=%d", (int)tracks_.size(), idx_), 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
+    if (ctx.debug) DrawText(TextFormat("tracks=%d idx=%d", (int)tracks_.size(), idx_), 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

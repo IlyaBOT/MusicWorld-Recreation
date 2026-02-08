@@ -36,7 +36,7 @@ void HelpScreen::onEnter() {
     btnPrev_.bgRel = "sprites/UI/Menu/Buttons/1404.png";
     btnNext_.bgRel = "sprites/UI/Menu/Buttons/1411.png";
     carousel_.speed = 8.5f;
-    SetupMenuBackButton(back_);
+    SetupMenuBackButton(back_, 400);
 }
 
 void HelpScreen::update(const UpdateContext& ctx) {
@@ -61,7 +61,7 @@ void HelpScreen::update(const UpdateContext& ctx) {
 }
 
 void HelpScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
 
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0051.png").tex;
     DrawTexture(title, 4, 4, WHITE);
@@ -82,5 +82,5 @@ void HelpScreen::draw(const DrawContext& ctx) {
     back_.draw(*ctx.assets);
 
     DrawText(TextFormat("%d/%d", idx_+1, (int)pages_.size()), 110, 292, 14, RAYWHITE);
-    if (ctx.debug) DrawText("HelpScreen", 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
+    if (ctx.debug) DrawText("HelpScreen", 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

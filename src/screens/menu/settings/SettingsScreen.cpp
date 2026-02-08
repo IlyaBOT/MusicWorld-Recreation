@@ -8,7 +8,7 @@ void SettingsScreen::onEnter() {
     vibToggle_.rect = { 30, 120, 180, 46 };
     vibToggle_.bgRel = "sprites/UI/Menu/Buttons/1359.png";
     vibToggle_.bgRelActive = "sprites/UI/Menu/Buttons/1360.png";
-    SetupMenuBackButton(back_);
+    SetupMenuBackButton(back_, 400);
     sliderNotes_ = { 30, 205, 180, 18 };
     sliderSound_ = { 30, 275, 180, 18 };
 }
@@ -71,7 +71,7 @@ void SettingsScreen::update(const UpdateContext& ctx) {
 }
 
 void SettingsScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
 
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0052.png").tex;
     DrawTexture(title, 4, 4, WHITE);
@@ -97,5 +97,5 @@ void SettingsScreen::draw(const DrawContext& ctx) {
     DrawText(TextFormat("%d", ctx.profile->syncSound), 200, 270, 14, RAYWHITE);
     back_.draw(*ctx.assets);
 
-    if (ctx.debug) DrawText("SettingsScreen", 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
+    if (ctx.debug) DrawText("SettingsScreen", 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

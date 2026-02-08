@@ -5,12 +5,13 @@ IScreen* App::top() { return stack_.empty() ? nullptr : stack_.back().get(); }
 
 void App::init() {
     std::filesystem::create_directories("save");
-    vs.init(240, 360);
+    vs.init(240, 400);
     assets.init();
     InitAudioDevice();
 
     profile.load(profilePath_);
     lastTime_ = (float)GetTime();
+    quitRequested_ = false;
 }
 
 void App::shutdown() {
@@ -43,6 +44,10 @@ void App::playSfx(const std::string& rel) {
 }
 
 void App::saveProfile() { profile.save(profilePath_); }
+
+void App::requestQuit() { quitRequested_ = true; }
+
+bool App::quitRequested() const { return quitRequested_; }
 
 void App::runOneFrame() {
     float now = (float)GetTime();

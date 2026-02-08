@@ -4,7 +4,7 @@
 #include "screens/menu/BackButton.h"
 
 void GameplayPlaceholderScreen::onEnter() {
-    SetupMenuBackButton(back_);
+    SetupMenuBackButton(back_, 400);
 }
 
 void GameplayPlaceholderScreen::update(const UpdateContext& ctx) {

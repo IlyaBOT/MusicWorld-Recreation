@@ -2,7 +2,7 @@
 #include "raylib.h"
 #include "core/Assets.h"
 
-inline void DrawMenuBackground(Assets& assets, int vw = 240, int vh = 360) {
+inline void DrawMenuBackground(Assets& assets, int vw = 240, int vh = 400) {
     auto top = assets.tex("sprites/UI/top.png").tex;
     auto half = assets.tex("sprites/UI/background_half.png").tex;
 
@@ -18,7 +18,7 @@ inline void DrawMenuBackground(Assets& assets, int vw = 240, int vh = 360) {
         DrawTexturePro(half, src, dst, {0,0}, 0.0f, WHITE);
 
         Rectangle topSrc = {0.0f, 0.0f, (float)top.width, (float)top.height};
-        Rectangle topDst = {0.0f, 0.0f, (float)vw, (float)(top.height + yBottom)};
+        Rectangle topDst = {0.0f, -2.0f, (float)vw, (float)(top.height + yBottom)};
         DrawTexturePro(top, topSrc, topDst, {0,0}, 0.0f, WHITE);
     } else {
         ClearBackground({255, 32, 190, 255});

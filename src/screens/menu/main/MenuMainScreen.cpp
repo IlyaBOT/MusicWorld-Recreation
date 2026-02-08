@@ -28,20 +28,23 @@ static ui::SpriteButton makeItem(float y, const std::string& labelRel) {
 }
 
 void MenuMainScreen::onEnter() {
+    constexpr float kMenuButtonYOffset = 8.0f;
     items_.clear();
-    items_.push_back(makeItem(86, "sprites/UI/Menu/Russian/game-btn.png")); // Game
-    items_.push_back(makeItem(126, "sprites/UI/Menu/Russian/player-btn.png")); // Player
-    items_.push_back(makeItem(166, "sprites/UI/Menu/Russian/help-btn.png")); // Help
-    items_.push_back(makeItem(206, "sprites/UI/Menu/Russian/settings-btn.png")); // Settings
-    items_.push_back(makeItem(246, "sprites/UI/Menu/Russian/records-btn.png")); // Records
-    items_.push_back(makeItem(286, "sprites/UI/Menu/Russian/exit-btn.png")); // Exit
+    items_.push_back(makeItem(86 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/game-btn.png")); // Game
+    items_.push_back(makeItem(126 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/player-btn.png")); // Player
+    items_.push_back(makeItem(166 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/help-btn.png")); // Help
+    items_.push_back(makeItem(206 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/settings-btn.png")); // Settings
+    items_.push_back(makeItem(246 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/records-btn.png")); // Records
+    items_.push_back(makeItem(286 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/exit-btn.png")); // Exit
 }
 
 void MenuMainScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
+    Vector2 hitPoint = st.mouseV;
+    hitPoint.y += 4.0f;
 
     for (int i = 0; i < (int)items_.size(); ++i) {
-        if (items_[i].update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport)) {
+        if (items_[i].update(hitPoint, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport)) {
             ctx.app->playSfx("sounds/MenuSelect.wav");
 
             if (i == 0) ctx.app->push(std::make_unique<ModeSelectScreen>());
@@ -49,16 +52,16 @@ void MenuMainScreen::update(const UpdateContext& ctx) {
             if (i == 2) ctx.app->push(std::make_unique<HelpScreen>());
             if (i == 3) ctx.app->push(std::make_unique<SettingsScreen>());
             if (i == 4) ctx.app->push(std::make_unique<RecordsFlow::ModeScreen>());
-            if (i == 5) CloseWindow();
+            if (i == 5) ctx.app->requestQuit();
             return;
         }
     }
 
-    if (st.keyBack) CloseWindow();
+    if (st.keyBack) ctx.app->requestQuit();
 }
 
 void MenuMainScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 360);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
 
     auto title = ctx.assets->tex("sprites/UI/Menu/Russian/menu-title.png").tex; // "МЕНЮ"
     DrawAt(title, 4, 4);
@@ -66,5 +69,5 @@ void MenuMainScreen::draw(const DrawContext& ctx) {
     for (int i = 0; i < (int)items_.size(); ++i) {
         items_[i].draw(*ctx.assets);
     }
-    if (ctx.debug) DrawText("MenuMainScreen", 6, (ctx.vs ? ctx.vs->vh : 360) - 12, 12, YELLOW);
+    if (ctx.debug) DrawText("MenuMainScreen", 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

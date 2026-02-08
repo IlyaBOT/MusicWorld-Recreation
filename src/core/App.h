@@ -38,6 +38,8 @@ public:
     void clearAndPush(ScreenPtr s);
 
     void runOneFrame();
+    void requestQuit();
+    bool quitRequested() const;
 
     void playSfx(const std::string& rel);
     void saveProfile();
@@ -53,6 +55,7 @@ private:
     std::vector<ScreenPtr> stack_;
     float lastTime_ = 0.0f;
     std::string profilePath_ = "save/profile.cfg";
+    bool quitRequested_ = false;
 
     IScreen* top();
 };

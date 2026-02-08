@@ -12,15 +12,6 @@ struct ModeScreen : public IScreen {
     ui::SpriteButton story{}, free{}, party{}, back{};
 };
 
-struct DifficultyScreen : public IScreen {
-    explicit DifficultyScreen(std::string mode) : mode(std::move(mode)) {}
-    void onEnter() override;
-    void update(const UpdateContext& ctx) override;
-    void draw(const DrawContext& ctx) override;
-    std::string mode;
-    ui::SpriteButton easy{}, med{}, hard{}, back{};
-};
-
 struct RecordsScreen : public IScreen {
     RecordsScreen(std::string mode, std::string diff) : mode(std::move(mode)), diff(std::move(diff)) {}
     void onEnter() override;

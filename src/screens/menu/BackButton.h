@@ -1,7 +1,7 @@
 #pragma once
 #include "ui/Widgets.h"
 
-inline void SetupMenuBackButton(ui::SpriteButton& b, int vh = 360) {
+inline void SetupMenuBackButton(ui::SpriteButton& b, int vh = 400) {
     b = {};
     b.rect = {1.0f, (float)(vh - 1 - 38), 38.0f, 38.0f};
     b.bgRel = "sprites/UI/Menu/Buttons/1393.png";

@@ -12,7 +12,7 @@ constexpr const char* kBgFrames[] = {
     "sprites/LevelBackgrounds/0579.png",
 };
 constexpr int kBgFrameCount = (int)(sizeof(kBgFrames) / sizeof(kBgFrames[0]));
-constexpr float kBgAnimFps = 8.0f;
+constexpr float kBgAnimFps = 16.0f;
 
 constexpr const char* kTapIdlePrimary = "sprites/UI/Menu/Buttons/tap-btn.png";
 constexpr const char* kTapIdleFallback = "sprites/UI/Menu/Russian/tap-btn.png";
@@ -20,6 +20,7 @@ constexpr const char* kTapActivePrimary = "sprites/UI/Menu/Buttons/tap-btn_selec
 constexpr const char* kTapActiveFallback = "sprites/UI/Menu/Russian/tap-btn_selected.png";
 constexpr const char* kTitleMusicRel = "music/title.mp3";
 constexpr float kTitleReplayDelaySec = 1.0f;
+constexpr float kTapBottomMarginPx = 15.0f;
 
 std::string ResolvePath(const char* primary, const char* fallback) {
     if (FileExists(Assets::A(primary).c_str())) return primary;
@@ -41,7 +42,7 @@ void TitleScreen::onEnter() {
     bgAnimTimer_ = 0.0f;
 
     tapButton_ = {};
-    tapButton_.rect = {11.0f, 319.0f, 218.0f, 26.0f};
+    tapButton_.rect = {11.0f, 400.0f - kTapBottomMarginPx - 26.0f, 218.0f, 26.0f};
     tapButton_.bgRel = ResolvePath(kTapIdlePrimary, kTapIdleFallback);
     tapButton_.bgRelActive = ResolvePath(kTapActivePrimary, kTapActiveFallback);
 
@@ -59,6 +60,8 @@ void TitleScreen::onExit() {
 
 void TitleScreen::update(const UpdateContext& ctx) {
     bgAnimTimer_ += ctx.dt;
+    int vh = ctx.vs ? ctx.vs->vh : 400;
+    tapButton_.rect.y = (float)vh - kTapBottomMarginPx - tapButton_.rect.height;
 
     if (titleMusicOk_) {
         UpdateMusicStream(titleMusic_);
@@ -126,7 +129,7 @@ void TitleScreen::startTitleMusic() {
 
 void TitleScreen::draw(const DrawContext& ctx) {
     int vw = ctx.vs ? ctx.vs->vw : 240;
-    int vh = ctx.vs ? ctx.vs->vh : 360;
+    int vh = ctx.vs ? ctx.vs->vh : 400;
     int frame = ((int)(bgAnimTimer_ * kBgAnimFps)) % kBgFrameCount;
 
     ClearBackground(BLACK);
