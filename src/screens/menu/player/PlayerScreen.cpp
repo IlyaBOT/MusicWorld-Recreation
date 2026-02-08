@@ -5,19 +5,31 @@
 #include "screens/menu/MenuBg.h"
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <filesystem>
 #include <limits>
 
 namespace {
-constexpr float kTrackCoverSize = 64.0f;
+constexpr float kTrackCoverSize = 80.0f;
+constexpr float kTrackCoverFrameSize = 104.0f;
 constexpr float kTrackCoverTopInset = 14.0f;
 constexpr float kPlayerCardX = 24.0f;
+constexpr int kTrackCount = 10;
+constexpr float kDebugNudgeStep = 1.0f;
 
 struct TrackOrderEntry {
     const char* key;
     int rank;
     const char* nameRel;
 };
+
+static Vector2 gDebugTrackNudge[kTrackCount] = {};
+
+static int wrapTrackIndex(int index) {
+    int i = index % kTrackCount;
+    if (i < 0) i += kTrackCount;
+    return i;
+}
 
 static constexpr TrackOrderEntry kTrackOrder[] = {
     {"MorningDew", 0, "sprites/UI/Menu/Russian/tracks/morning-dew.png"},
@@ -91,13 +103,13 @@ struct TrackBgLayout {
 
 static TrackBgLayout trackBackgroundLayout(int trackIndex) {
     constexpr float kZoomDefault = 1.0f;
-    constexpr float kZoomTight = 1.5f;
+    constexpr float kZoomTight = 1.0f;
     switch (trackIndex) {
     case 0: return {"sprites/LevelBackgrounds/0580.png", 0.0f, -20.0f, kZoomTight};
-    case 1: return {"sprites/LevelBackgrounds/0581.png", -54.0f, -30.0f, kZoomTight};
-    case 2: return {"sprites/LevelBackgrounds/0581.png", 56.0f, 18.0f, kZoomTight};
+    case 1: return {"sprites/LevelBackgrounds/0581.png", 81.0f, 62.0f, kZoomTight};
+    case 2: return {"sprites/LevelBackgrounds/0581.png", 32.0f, 3.0f, kZoomTight};
     case 3: return {"sprites/LevelBackgrounds/0582.png", -18.0f, 12.0f, kZoomDefault};
-    case 4: return {"sprites/LevelBackgrounds/0583.png", -60.0f, -22.0f, kZoomTight};
+    case 4: return {"sprites/LevelBackgrounds/0583.png", 10.0f, 60.0f, 1.0f};
     case 5: return {"sprites/LevelBackgrounds/0583.png", 52.0f, 26.0f, kZoomTight};
     case 6: return {"sprites/LevelBackgrounds/0584.png", 0.0f, -8.0f, kZoomDefault};
     case 7: return {"sprites/LevelBackgrounds/0584.png", -42.0f, -34.0f, kZoomTight};
@@ -122,9 +134,68 @@ static const char* track10AnimatedBackgroundRel() {
     return kFrames[frame];
 }
 
+static TrackBgLayout adjustedTrackBackgroundLayout(int trackIndex) {
+    int i = wrapTrackIndex(trackIndex);
+    TrackBgLayout layout = trackBackgroundLayout(i);
+    layout.offsetX += gDebugTrackNudge[i].x;
+    layout.offsetY += gDebugTrackNudge[i].y;
+    return layout;
+}
+
+static void printTrackBackgroundDebugLine(const UpdateContext& ctx, int trackIndex, const std::string& trackFileRel) {
+    int i = wrapTrackIndex(trackIndex);
+    TrackBgLayout layout = adjustedTrackBackgroundLayout(i);
+    if (!layout.rel) return;
+
+    const char* previewRel = (i == 9) ? track10AnimatedBackgroundRel() : layout.rel;
+    Texture2D bg = ctx.assets->tex(previewRel).tex;
+
+    float absX = 0.0f;
+    float absY = 0.0f;
+    bool haveAbs = (bg.id && bg.width > 0 && bg.height > 0);
+    if (haveAbs) {
+        absX = (float)bg.width * 0.5f + layout.offsetX;
+        absY = (float)bg.height * 0.5f + layout.offsetY;
+    }
+
+    if (haveAbs) {
+        std::printf(
+            "[cover-debug] track=%d file=%s abs=(%.1f, %.1f) offset=(%.1f, %.1f) nudge=(%.1f, %.1f) -> case %d: return {\"%s\", %.1ff, %.1ff, %.1ff};\n",
+            i + 1,
+            trackFileRel.c_str(),
+            absX,
+            absY,
+            layout.offsetX,
+            layout.offsetY,
+            gDebugTrackNudge[i].x,
+            gDebugTrackNudge[i].y,
+            i,
+            layout.rel,
+            layout.offsetX,
+            layout.offsetY,
+            layout.zoom);
+    } else {
+        std::printf(
+            "[cover-debug] track=%d file=%s abs=(n/a) offset=(%.1f, %.1f) nudge=(%.1f, %.1f) -> case %d: return {\"%s\", %.1ff, %.1ff, %.1ff};\n",
+            i + 1,
+            trackFileRel.c_str(),
+            layout.offsetX,
+            layout.offsetY,
+            gDebugTrackNudge[i].x,
+            gDebugTrackNudge[i].y,
+            i,
+            layout.rel,
+            layout.offsetX,
+            layout.offsetY,
+            layout.zoom);
+    }
+    std::fflush(stdout);
+}
+
 static bool drawTrackBackground(const DrawContext& ctx, Rectangle view, int trackIndex) {
-    TrackBgLayout layout = trackBackgroundLayout(trackIndex);
-    const char* rel = (trackIndex == 9) ? track10AnimatedBackgroundRel() : layout.rel;
+    int i = wrapTrackIndex(trackIndex);
+    TrackBgLayout layout = adjustedTrackBackgroundLayout(i);
+    const char* rel = (i == 9) ? track10AnimatedBackgroundRel() : layout.rel;
     if (!rel || view.width <= 0 || view.height <= 0) return false;
 
     auto bg = ctx.assets->tex(rel).tex;
@@ -151,7 +222,29 @@ static bool drawTrackBackground(const DrawContext& ctx, Rectangle view, int trac
     return true;
 }
 
-static Texture2D playerCounterGlyph(const DrawContext& ctx, char ch) {
+static void drawDebugArrowButton(const DrawContext& ctx, const ui::SpriteButton& b, float rotationDeg) {
+    const bool active = b.hovered || b.pressed;
+    Texture2D tex = ctx.assets->tex(active
+        ? "sprites/UI/Menu/Buttons/right-btn_selected.png"
+        : "sprites/UI/Menu/Buttons/right-btn.png").tex;
+    if (!tex.id) return;
+
+    Rectangle src = {0.0f, 0.0f, (float)tex.width, (float)tex.height};
+    Rectangle dst = {b.rect.x + b.rect.width * 0.5f, b.rect.y + b.rect.height * 0.5f, b.rect.width, b.rect.height};
+    Vector2 origin = {dst.width * 0.5f, dst.height * 0.5f};
+    DrawTexturePro(tex, src, dst, origin, rotationDeg, WHITE);
+}
+
+static Texture2D playerCounterCurrentGlyph(const DrawContext& ctx, char ch) {
+    if (ch >= '0' && ch <= '9') {
+        char rel[64];
+        snprintf(rel, sizeof(rel), "sprites/UI/Fonts/%04d.png", 850 + (ch - '0'));
+        return ctx.assets->tex(rel).tex;
+    }
+    return {};
+}
+
+static Texture2D playerCounterLegacyGlyph(const DrawContext& ctx, char ch) {
     switch (ch) {
     case '/': return ctx.assets->tex("sprites/UI/Fonts/1002.png").tex;
     case '0': return ctx.assets->tex("sprites/UI/Fonts/0992.png").tex;
@@ -168,10 +261,10 @@ static Texture2D playerCounterGlyph(const DrawContext& ctx, char ch) {
     }
 }
 
-static int measureCounterSprites(const DrawContext& ctx, const std::string& text) {
+static int measureCounterSprites(const DrawContext& ctx, const std::string& text, Texture2D (*glyphFn)(const DrawContext&, char)) {
     int width = 0;
     for (char ch : text) {
-        Texture2D g = playerCounterGlyph(ctx, ch);
+        Texture2D g = glyphFn(ctx, ch);
         if (!g.id) continue;
         width += g.width + 1;
     }
@@ -179,10 +272,10 @@ static int measureCounterSprites(const DrawContext& ctx, const std::string& text
     return width;
 }
 
-static void drawCounterSprites(const DrawContext& ctx, const std::string& text, float x, float y) {
+static void drawCounterSprites(const DrawContext& ctx, const std::string& text, float x, float y, Texture2D (*glyphFn)(const DrawContext&, char)) {
     float drawX = x;
     for (char ch : text) {
-        Texture2D g = playerCounterGlyph(ctx, ch);
+        Texture2D g = glyphFn(ctx, ch);
         if (!g.id) continue;
         DrawTexture(g, (int)drawX, (int)y, WHITE);
         drawX += g.width + 1.0f;
@@ -274,6 +367,13 @@ void PlayerScreen::onEnter() {
     btnNext_.bgRelActive = "sprites/UI/Menu/Buttons/forward-btn_selected.png";
     btnPlay_.bgRel = "sprites/UI/Menu/Buttons/play-big-btn.png";
     btnPlay_.bgRelActive = "sprites/UI/Menu/Buttons/play-big-btn_selected.png";
+
+    // Cover-offset debug arrows (left/up/down/right)
+    dbgLeft_.rect  = {170, 248, 18, 18};
+    dbgUp_.rect    = {188, 230, 18, 18};
+    dbgDown_.rect  = {188, 266, 18, 18};
+    dbgRight_.rect = {206, 248, 18, 18};
+
     SetupMenuBackButton(back_, 400);
 
     carousel_.speed = 8.5f;
@@ -338,6 +438,18 @@ void PlayerScreen::update(const UpdateContext& ctx) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
     }
 
+    bool dbgChanged = false;
+    int ti = wrapTrackIndex(idx_);
+    if (click(dbgLeft_))  { gDebugTrackNudge[ti].x -= kDebugNudgeStep; dbgChanged = true; }
+    if (click(dbgRight_)) { gDebugTrackNudge[ti].x += kDebugNudgeStep; dbgChanged = true; }
+    if (click(dbgUp_))    { gDebugTrackNudge[ti].y -= kDebugNudgeStep; dbgChanged = true; }
+    if (click(dbgDown_))  { gDebugTrackNudge[ti].y += kDebugNudgeStep; dbgChanged = true; }
+    if (dbgChanged) {
+        ctx.app->playSfx("sounds/MenuSelect.wav");
+        const std::string trackFileRel = (idx_ >= 0 && idx_ < (int)tracks_.size()) ? tracks_[idx_].fileRel : std::string("<unknown>");
+        printTrackBackgroundDebugLine(ctx, idx_, trackFileRel);
+    }
+
 }
 
 static void drawEq(const DrawContext& ctx, float x, float y) {
@@ -362,14 +474,14 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     const auto& t = tracks_[idx_];
 
     Rectangle coverFrame = {
-        card.x + (card.width - (kTrackCoverSize + 4.0f)) * 0.5f,
+        card.x + (card.width - kTrackCoverFrameSize) * 0.5f,
         card.y + kTrackCoverTopInset - 2.0f,
-        kTrackCoverSize + 4.0f,
-        kTrackCoverSize + 4.0f
+        kTrackCoverFrameSize,
+        kTrackCoverFrameSize
     };
     Rectangle playerWindow = {
-        coverFrame.x + 2.0f,
-        coverFrame.y + 2.0f,
+        coverFrame.x + (coverFrame.width - kTrackCoverSize) * 0.5f,
+        coverFrame.y + (coverFrame.height - kTrackCoverSize) * 0.5f,
         kTrackCoverSize,
         kTrackCoverSize
     };
@@ -383,11 +495,16 @@ void PlayerScreen::draw(const DrawContext& ctx) {
         else DrawTextCentered("track icon", (int)(playerWindow.x + playerWindow.width * 0.5f), (int)(playerWindow.y + playerWindow.height * 0.5f - 6), 12, GRAY);
     }
 
-    std::string counterText = std::to_string(idx_ + 1) + "/" + std::to_string((int)tracks_.size());
-    int counterW = measureCounterSprites(ctx, counterText);
-    float counterX = playerWindow.x + playerWindow.width - (float)counterW - 1.0f;
-    float counterY = playerWindow.y + playerWindow.height - 13.0f;
-    drawCounterSprites(ctx, counterText, counterX, counterY);
+    std::string currentTrackText = std::to_string(idx_ + 1);
+    std::string tailTrackText = "/" + std::to_string((int)tracks_.size());
+    int currentW = measureCounterSprites(ctx, currentTrackText, playerCounterCurrentGlyph);
+    int tailW = measureCounterSprites(ctx, tailTrackText, playerCounterLegacyGlyph);
+    int betweenGap = (currentW > 0 && tailW > 0) ? 1 : 0;
+    int counterW = currentW + betweenGap + tailW;
+    float counterX = playerWindow.x + playerWindow.width - (float)counterW - 1.0f + 4.0f;
+    float counterY = playerWindow.y + playerWindow.height - 13.0f + 2.0f;
+    drawCounterSprites(ctx, currentTrackText, counterX, counterY, playerCounterCurrentGlyph);
+    drawCounterSprites(ctx, tailTrackText, counterX + currentW + betweenGap, counterY, playerCounterLegacyGlyph);
 
     auto name = ctx.assets->tex(t.namePngRel).tex;
     float nameY = playerWindow.y + playerWindow.height + 18.0f;
@@ -401,6 +518,10 @@ void PlayerScreen::draw(const DrawContext& ctx) {
     btnPlay_.bgRel = playing_ ? "sprites/UI/Menu/Buttons/pause-big-btn.png" : "sprites/UI/Menu/Buttons/play-big-btn.png";
     btnPlay_.bgRelActive = playing_ ? "sprites/UI/Menu/Buttons/pause-big-btn_selected.png" : "sprites/UI/Menu/Buttons/play-big-btn_selected.png";
     btnPlay_.draw(*ctx.assets);
+    drawDebugArrowButton(ctx, dbgLeft_, 180.0f);
+    drawDebugArrowButton(ctx, dbgUp_, -90.0f);
+    drawDebugArrowButton(ctx, dbgDown_, 90.0f);
+    drawDebugArrowButton(ctx, dbgRight_, 0.0f);
     back_.draw(*ctx.assets);
 
     if (ctx.debug) DrawText(TextFormat("tracks=%d idx=%d", (int)tracks_.size(), idx_), 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);

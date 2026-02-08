@@ -23,6 +23,7 @@ private:
     int idx_ = 0;
 
     ui::SpriteButton btnPrev_{}, btnNext_{}, btnPlay_{}, back_{};
+    ui::SpriteButton dbgLeft_{}, dbgRight_{}, dbgUp_{}, dbgDown_{};
     ui::Carousel carousel_{};
 
     ::Music music_{};
