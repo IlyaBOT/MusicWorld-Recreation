@@ -225,9 +225,11 @@ void PlayerScreen::onEnter() {
     trackDirty_ = true;
     remixState_ = false;
     playing_ = false;
+    app_ = nullptr;
 }
 
 void PlayerScreen::onExit() {
+    if (app_) app_->resumeMenuMusic();
     if (musicOk_) {
         StopMusicStream(music_);
         UnloadMusicStream(music_);
@@ -238,7 +240,20 @@ void PlayerScreen::onExit() {
 void PlayerScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
-    if (st.keyBack || click(back_)) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
+    if (ctx.app) {
+        app_ = ctx.app;
+        app_->pauseMenuMusic();
+    }
+
+    if (st.keyBack || click(back_)) {
+        if (ctx.app) {
+            ctx.app->resumeMenuMusic();
+            ctx.app->requestMenuMusic();
+            ctx.app->pop();
+            ctx.app->playSfx("sounds/MenuBack.wav");
+        }
+        return;
+    }
 
     ensureTrackLoaded(ctx);
     if (musicOk_) UpdateMusicStream(music_);
@@ -266,7 +281,6 @@ void PlayerScreen::update(const UpdateContext& ctx) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
     }
 
-    if (!playing_ && ctx.app) ctx.app->requestMenuMusic();
 }
 
 static void drawEq(const DrawContext& ctx, float x, float y) {

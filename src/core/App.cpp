@@ -88,6 +88,14 @@ void App::requestMenuMusic() {
     menuMusicKeepAlive_ = true;
 }
 
+void App::pauseMenuMusic() {
+    menuMusicPaused_ = true;
+}
+
+void App::resumeMenuMusic() {
+    menuMusicPaused_ = false;
+}
+
 std::string App::resolveMusicRel(const std::string& rel) const {
     constexpr std::string_view kRemixPrefix = "music/remix/";
     constexpr std::string_view kBasePrefix = "music/";
@@ -103,10 +111,19 @@ std::string App::resolveMusicRel(const std::string& rel) const {
 void App::updateMenuMusic() {
     if (!profile.musicEnabled) {
         unloadMenuMusic();
+        menuMusicPaused_ = false;
         return;
     }
 
     bool wantRemix = profile.musicRemix;
+    if (menuMusicPaused_) {
+        if (menuMusicOk_ && menuMusicPlaying_) {
+            PauseMusicStream(menuMusic_);
+            menuMusicPlaying_ = false;
+        }
+        return;
+    }
+
     if (!menuMusicKeepAlive_) {
         unloadMenuMusic();
         return;
@@ -122,6 +139,7 @@ void App::updateMenuMusic() {
             if (menuMusicOk_) {
                 menuMusic_.looping = true;
                 SetMusicVolume(menuMusic_, 0.9f);
+                menuMusicStarted_ = false;
                 menuMusicRemixState_ = wantRemix;
             } else {
                 menuMusic_ = {};
@@ -132,7 +150,11 @@ void App::updateMenuMusic() {
     if (menuMusicOk_) {
         UpdateMusicStream(menuMusic_);
         if (!menuMusicPlaying_) {
-            PlayMusicStream(menuMusic_);
+            if (menuMusicStarted_) ResumeMusicStream(menuMusic_);
+            else {
+                PlayMusicStream(menuMusic_);
+                menuMusicStarted_ = true;
+            }
             menuMusicPlaying_ = true;
         }
     }
@@ -146,4 +168,5 @@ void App::unloadMenuMusic() {
     menuMusic_ = {};
     menuMusicOk_ = false;
     menuMusicPlaying_ = false;
+    menuMusicStarted_ = false;
 }

@@ -43,6 +43,8 @@ public:
 
     void playSfx(const std::string& rel);
     void requestMenuMusic();
+    void pauseMenuMusic();
+    void resumeMenuMusic();
     std::string resolveMusicRel(const std::string& rel) const;
     void saveProfile();
 
@@ -62,6 +64,8 @@ private:
     ::Music menuMusic_{};
     bool menuMusicOk_ = false;
     bool menuMusicPlaying_ = false;
+    bool menuMusicStarted_ = false;
+    bool menuMusicPaused_ = false;
     bool menuMusicRemixState_ = false;
 
     IScreen* top();

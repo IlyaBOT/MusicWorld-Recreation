@@ -30,6 +30,7 @@ private:
     bool playing_ = false;
     bool trackDirty_ = true;
     bool remixState_ = false;
+    class App* app_ = nullptr;
 
     void scanTracks();
     void loadTrack(const UpdateContext& ctx, int i);
