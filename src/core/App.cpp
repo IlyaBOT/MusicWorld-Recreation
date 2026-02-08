@@ -11,6 +11,7 @@ void App::init() {
 
     profile.load(profilePath_);
     lastTime_ = (float)GetTime();
+    quitRequested_ = false;
 }
 
 void App::shutdown() {
@@ -44,6 +45,10 @@ void App::playSfx(const std::string& rel) {
 
 void App::saveProfile() { profile.save(profilePath_); }
 
+void App::requestQuit() { quitRequested_ = true; }
+
+bool App::quitRequested() const { return quitRequested_; }
+
 void App::runOneFrame() {
     float now = (float)GetTime();
     float dt = now - lastTime_;
@@ -69,6 +74,6 @@ void App::runOneFrame() {
         DrawText(TextFormat("x=%.1f y=%.1f swipe=%d", st.mouseV.x, st.mouseV.y, (int)st.swipe), 4, 18, 12, Fade(RAYWHITE, 0.85f));
     }
 
-    toast.draw(240, 400, debug);
+    toast.draw(vs.vw, vs.vh, debug);
     vs.end();
 }

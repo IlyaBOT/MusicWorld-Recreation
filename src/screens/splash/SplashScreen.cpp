@@ -5,9 +5,9 @@
 #include <memory>
 
 namespace {
-constexpr float kCom2UsDurationSec = 2.0f;
 constexpr float kLgDurationSec = 2.0f;
-constexpr float kSplashDurationSec = kCom2UsDurationSec + kLgDurationSec;
+constexpr float kCom2UsDurationSec = 2.0f;
+constexpr float kSplashDurationSec = kLgDurationSec + kCom2UsDurationSec;
 }
 
 void SplashScreen::update(const UpdateContext& ctx) {
@@ -20,13 +20,14 @@ void SplashScreen::update(const UpdateContext& ctx) {
 
 void SplashScreen::draw(const DrawContext& ctx) {
     ClearBackground(WHITE);
-    bool showLg = timer_ >= kCom2UsDurationSec;
-    auto logo = ctx.assets->tex(showLg ? "sprites/UI/Title/lg.png" : "sprites/UI/Title/com2us.png").tex;
+    bool showCom2us = timer_ >= kLgDurationSec;
+    auto logo = ctx.assets->tex(showCom2us ? "sprites/UI/Title/com2us.png" : "sprites/UI/Title/lg.png").tex;
     DrawCentered(logo, 120, 200);
+    int textY = (ctx.vs ? ctx.vs->vh : 400) - 16;
     if (!logo.id || ctx.debug) {
-        DrawTextCentered(showLg
-            ? "LG Electronics (missing sprites/UI/Title/lg.png)"
-            : "com2us (missing sprites/UI/Title/com2us.png)",
-            120, 360, 12, GRAY);
+        DrawTextCentered(showCom2us
+            ? "com2us (missing sprites/UI/Title/com2us.png)"
+            : "LG Electronics (missing sprites/UI/Title/lg.png)",
+            120, textY, 12, GRAY);
     }
 }

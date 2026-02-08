@@ -12,7 +12,7 @@ public:
 private:
     std::vector<std::string> pages_;
     int idx_ = 0;
-    ui::SpriteButton btnPrev_{}, btnNext_{};
+    ui::SpriteButton btnPrev_{}, btnNext_{}, back_{};
     ui::Carousel carousel_{};
 
     void scanPages();

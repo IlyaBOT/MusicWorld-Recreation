@@ -8,33 +8,43 @@
 #include "screens/menu/settings/SettingsScreen.h"
 #include "screens/menu/records/RecordsFlow.h"
 #include <memory>
+#include <string>
 
 static ui::SpriteButton makeItem(float y, const std::string& labelRel) {
+    auto labelSelected = [&]() {
+        constexpr const char* kExt = ".png";
+        if (labelRel.size() <= 4 || labelRel.rfind(kExt) != labelRel.size() - 4) return labelRel;
+        std::string candidate = labelRel.substr(0, labelRel.size() - 4) + "_selected.png";
+        return FileExists(Assets::A(candidate).c_str()) ? candidate : labelRel;
+    };
+
     ui::SpriteButton b;
     b.rect = { 22, y, 196, 36 };
     b.bgRel = "sprites/UI/Menu/Buttons/1359.png";
-    b.bgRelActive = "sprites/UI/Menu/Buttons/1360.png";
+    b.bgRelActive = "sprites/UI/Menu/Buttons/1363.png";
     b.labelRel = labelRel;
+    b.labelRelActive = labelSelected();
     return b;
 }
 
 void MenuMainScreen::onEnter() {
+    constexpr float kMenuButtonYOffset = 8.0f;
     items_.clear();
-    items_.push_back(makeItem(122, "sprites/UI/Menu/Russian/0004.png")); // Game
-    items_.push_back(makeItem(162, "sprites/UI/Menu/Russian/0005.png")); // Player
-    items_.push_back(makeItem(202, "sprites/UI/Menu/Russian/0006.png")); // Help
-    items_.push_back(makeItem(242, "sprites/UI/Menu/Russian/0007.png")); // Settings
-    items_.push_back(makeItem(282, "sprites/UI/Menu/Russian/0008.png")); // Records
-    items_.push_back(makeItem(322, "sprites/UI/Menu/Russian/0036.png")); // Exit
-    focus_ = 0;
+    items_.push_back(makeItem(86 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/game-btn.png")); // Game
+    items_.push_back(makeItem(126 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/player-btn.png")); // Player
+    items_.push_back(makeItem(166 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/help-btn.png")); // Help
+    items_.push_back(makeItem(206 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/settings-btn.png")); // Settings
+    items_.push_back(makeItem(246 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/records-btn.png")); // Records
+    items_.push_back(makeItem(286 + kMenuButtonYOffset, "sprites/UI/Menu/Russian/exit-btn.png")); // Exit
 }
 
 void MenuMainScreen::update(const UpdateContext& ctx) {
     auto st = ctx.input->state();
+    Vector2 hitPoint = st.mouseV;
+    hitPoint.y += 4.0f;
 
     for (int i = 0; i < (int)items_.size(); ++i) {
-        if (items_[i].update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport)) {
-            focus_ = i;
+        if (items_[i].update(hitPoint, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport)) {
             ctx.app->playSfx("sounds/MenuSelect.wav");
 
             if (i == 0) ctx.app->push(std::make_unique<ModeSelectScreen>());
@@ -42,24 +52,22 @@ void MenuMainScreen::update(const UpdateContext& ctx) {
             if (i == 2) ctx.app->push(std::make_unique<HelpScreen>());
             if (i == 3) ctx.app->push(std::make_unique<SettingsScreen>());
             if (i == 4) ctx.app->push(std::make_unique<RecordsFlow::ModeScreen>());
-            if (i == 5) CloseWindow();
+            if (i == 5) ctx.app->requestQuit();
             return;
         }
     }
 
-    if (st.keyBack) CloseWindow();
+    if (st.keyBack) ctx.app->requestQuit();
 }
 
 void MenuMainScreen::draw(const DrawContext& ctx) {
-    DrawMenuBackground(*ctx.assets);
+    DrawMenuBackground(*ctx.assets, ctx.vs ? ctx.vs->vw : 240, ctx.vs ? ctx.vs->vh : 400);
 
-    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/0046.png").tex; // "МЕНЮ"
-    DrawAt(title, 10, 18);
+    auto title = ctx.assets->tex("sprites/UI/Menu/Russian/menu-title.png").tex; // "МЕНЮ"
+    DrawAt(title, 4, 4);
 
     for (int i = 0; i < (int)items_.size(); ++i) {
-        auto& b = items_[i];
-        b.hovered = b.hovered || (i == focus_);
-        b.draw(*ctx.assets);
+        items_[i].draw(*ctx.assets);
     }
-    if (ctx.debug) DrawText("MenuMainScreen", 6, 384, 12, YELLOW);
+    if (ctx.debug) DrawText("MenuMainScreen", 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

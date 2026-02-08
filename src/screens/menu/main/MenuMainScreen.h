@@ -9,6 +9,5 @@ public:
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
 private:
-    int focus_ = 0;
     std::vector<ui::SpriteButton> items_;
 };

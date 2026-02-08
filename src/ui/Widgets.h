@@ -20,6 +20,7 @@ struct SpriteButton {
     std::string bgRel;
     std::string bgRelActive;
     std::string labelRel;
+    std::string labelRelActive;
     bool enabled = true;
 
     bool hovered = false;

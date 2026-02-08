@@ -8,5 +8,5 @@ public:
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
 private:
-    ui::SpriteButton dj_{}, story_{}, free_{}, party_{};
+    ui::SpriteButton dj_{}, story_{}, free_{}, party_{}, back_{};
 };
