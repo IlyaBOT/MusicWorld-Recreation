@@ -112,12 +112,58 @@ cmake --build build -j
 ---
 
 ## Build on Android
+
 ### Requirements
-- Android Studio (with SDK + NDK + CMake installed)
+- Linux x86_64
+- OpenJDK 17
+- Android SDK command-line tools (or Android Studio)
+
+### Install SDK + NDK on a Linux (Via CLI)
+
+Download OpenJDK and etc:
+```bash
+sudo apt update
+sudo apt install -y openjdk-17-jdk unzip wget
+```
+
+Download and setup Android SDK CLI Tools:
+```bash
+export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+wget -O /tmp/commandlinetools.zip \
+  https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip -q /tmp/commandlinetools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" \
+   "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+
+export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+```
+
+Download and setup Android SDK, NDK and etc:
+```bash
+yes | sdkmanager --licenses
+sdkmanager \
+  "platform-tools" \
+  "platforms;android-34" \
+  "build-tools;34.0.0" \
+  "cmake;3.22.1" \
+  "ndk;27.2.12479018"
+```
+
+Persist env vars for bash (recommended):
+```bash
+echo 'export ANDROID_SDK_ROOT="$HOME/Android/Sdk"' >> ~/.bashrc
+echo 'export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
 
 ### Notes
 - Native C++ is built from the root `CMakeLists.txt`.
 - APK assets are taken directly from repo folder `assets/` via `sourceSets`; no manual copy step.
+- Project Android versions:
+  - `compileSdk` / `targetSdk`: `34`
+  - CMake: `3.22.1`
+  - NDK: `27.2.12479018`
 
 ### Build in Android Studio
 1. Open `android/` as project.
@@ -126,6 +172,8 @@ cmake --build build -j
 
 ### Build from CLI (inside `android/`)
 ```bash
+cd android
+printf "sdk.dir=%s\nndk.dir=%s\n" "$ANDROID_SDK_ROOT" "$ANDROID_SDK_ROOT/ndk/27.2.12479018" > local.properties
 ./gradlew assembleDebug
 ```
 
