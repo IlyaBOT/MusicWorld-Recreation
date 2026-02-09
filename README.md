@@ -5,9 +5,9 @@ Desktop build is fully supported. Android project is in `android/` directory.
 
 ## Screenshots
 <p>
-  <img src="screenshots/2026-02-09%2020.58.03.jpg" width="360" height="600" alt="Screenshot 1">
-  <img src="screenshots/2026-02-09%2020.58.48.jpg" width="360" height="600" alt="Screenshot 2">
-  <img src="screenshots/2026-02-09%2020.56.59.jpg" width="360" height="600" alt="Screenshot 3">
+  <img src="screenshots/2026-02-09%2020.58.03.jpg" width="240" height="400" alt="Screenshot 1">
+  <img src="screenshots/2026-02-09%2020.58.48.jpg" width="240" height="400" alt="Screenshot 2">
+  <img src="screenshots/2026-02-09%2020.56.59.jpg" width="360" height="400" alt="Screenshot 3">
 </p>
 
 ## Supported platforms
