@@ -1,4 +1,27 @@
-DumpedData
-build
-save
+# Runtime/user data
+DumpedData/
+save/
+
+# Desktop CMake/build artifacts
+build/
+cmake-build-*/
+compile_commands.json
+
+# Android/Gradle local and generated files
+android/local.properties
+android/.gradle/
+android/.gradle-home/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/app/.externalNativeBuild/
+android/captures/
+
+# IDE/editor local files
+.idea/
+.vscode/
+*.iml
+
+# OS junk
 .DS_Store
+Thumbs.db
