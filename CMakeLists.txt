@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.18)
-project(mw_recreation LANGUAGES C CXX)
+set(MW_BUILD_VERSION "0.1")
+if(EXISTS "${CMAKE_SOURCE_DIR}/VERSION")
+  file(READ "${CMAKE_SOURCE_DIR}/VERSION" MW_BUILD_VERSION_RAW)
+  string(STRIP "${MW_BUILD_VERSION_RAW}" MW_BUILD_VERSION)
+  if(MW_BUILD_VERSION STREQUAL "")
+    set(MW_BUILD_VERSION "0.1")
+  endif()
+endif()
+project(mw_recreation VERSION ${MW_BUILD_VERSION} LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -56,6 +64,7 @@ endif()
 
 target_include_directories(mw_recreation PRIVATE src)
 target_link_libraries(mw_recreation PRIVATE raylib)
+target_compile_definitions(mw_recreation PRIVATE MW_BUILD_VERSION="${MW_BUILD_VERSION}")
 
 if (ANDROID)
   # Keep NativeActivity entrypoint from raylib/native_app_glue in the final .so.

@@ -1,5 +1,6 @@
 #include "screens/menu/settings/SettingsScreen.h"
 #include "core/App.h"
+#include "core/BuildVersion.h"
 #include "core/DrawUtil.h"
 #include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
@@ -578,6 +579,18 @@ void SettingsScreen::draw(const DrawContext& ctx) {
     drawRoundedRectPx(sb.thumb, kScrollbarThumbRadius, thumbColor);
 
     back_.draw(*ctx.assets);
+
+    const std::string versionText = std::string("v") + buildinfo::kVersion;
+    const int versionFontSize = 12;
+    const int versionY = vh - 8 - versionFontSize;
+    const int versionX = (vw - MeasureText(versionText.c_str(), versionFontSize)) / 2;
+    DrawText(versionText.c_str(), versionX, versionY, versionFontSize, Fade(RAYWHITE, 0.9f));
+
+    const std::string devText = std::string("Made by ") + buildinfo::kDeveloper + " @ " + buildinfo::kDevelopmentYear;
+    const int devFontSize = 9;
+    const int devY = versionY - 10;
+    const int devX = (vw - MeasureText(devText.c_str(), devFontSize)) / 2;
+    DrawText(devText.c_str(), devX, devY, devFontSize, Fade(RAYWHITE, 0.75f));
 
     if (ctx.debug) DrawText("SettingsScreen", 6, (ctx.vs ? ctx.vs->vh : 400) - 12, 12, YELLOW);
 }

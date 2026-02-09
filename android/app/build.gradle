@@ -2,6 +2,9 @@ plugins {
     id 'com.android.application'
 }
 
+def versionFile = file("../../VERSION")
+def appVersionName = versionFile.exists() ? versionFile.text.trim() : "0.1"
+
 android {
     namespace 'com.musicworld.recreation'
     compileSdk 34
@@ -11,7 +14,7 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName appVersionName
 
         externalNativeBuild {
             cmake {
