@@ -3,6 +3,20 @@
 Music World recreation for Android, iOS and PC, using C++17 + raylib + CMake.
 Desktop build is fully supported. Android project is in `android/` directory.
 
+## Screenshots
+<p>
+  <img src="screenshots/2026-02-09%2020.58.03.jpg" width="360" height="600" alt="Screenshot 1">
+  <img src="screenshots/2026-02-09%2020.58.48.jpg" width="360" height="600" alt="Screenshot 2">
+  <img src="screenshots/2026-02-09%2020.56.59.jpg" width="360" height="600" alt="Screenshot 3">
+</p>
+
+## Supported platforms
+- Android: **7.0+** (API 24, `minSdk 24`)
+- Linux: **x86_64**, Ubuntu 20.04+ (or equivalent modern distro with OpenGL + ALSA)
+- macOS X: **10.15+** (Intel, x64)
+- Windows: **10+** (x64)
+- iOS: **13.0+** (WIP)
+
 ## Project progress
 - Virtual resolution **240x400** (scales with letterboxing).
 - Screens:
