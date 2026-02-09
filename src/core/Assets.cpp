@@ -87,7 +87,11 @@ void Assets::shutdown() {
 }
 
 std::string Assets::A(const std::string& rel) {
+#if defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS)
+    return rel;
+#else
     return std::string("assets/") + rel;
+#endif
 }
 
 TextureHandle Assets::tex(const std::string& relPath) {

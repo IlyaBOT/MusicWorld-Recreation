@@ -11,6 +11,10 @@ if(MW_USE_SYSTEM_RAYLIB)
 else()
   include(FetchContent)
   set(FETCHCONTENT_QUIET OFF)
+  if (ANDROID)
+    # raylib expects this cache variable to configure Android backend/libs.
+    set(PLATFORM Android CACHE STRING "raylib target platform" FORCE)
+  endif()
   FetchContent_Declare(
     raylib
     GIT_REPOSITORY https://github.com/raysan5/raylib.git
@@ -19,7 +23,7 @@ else()
   FetchContent_MakeAvailable(raylib)
 endif()
 
-add_executable(mw_recreation
+set(MW_RECREATION_SOURCES
   src/main.cpp
 
   src/core/App.cpp
@@ -43,6 +47,12 @@ add_executable(mw_recreation
 
   src/screens/gameplay/GameplayPlaceholderScreen.cpp
 )
+
+if (ANDROID)
+  add_library(mw_recreation SHARED ${MW_RECREATION_SOURCES})
+else()
+  add_executable(mw_recreation ${MW_RECREATION_SOURCES})
+endif()
 
 target_include_directories(mw_recreation PRIVATE src)
 target_link_libraries(mw_recreation PRIVATE raylib)

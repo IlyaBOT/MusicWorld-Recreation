@@ -1,7 +1,7 @@
 # Music World Recreation
 
 Music World recreation for Android, iOS and PC, using C++17 + raylib + CMake.
-Runs on macOS, Linux and Windows only right now. Mobile support will be added later.
+Desktop build is fully supported. Android project scaffolding is included in `android/`.
 
 ## Project progress
 - Virtual resolution **240x400** (scales with letterboxing).
@@ -17,7 +17,9 @@ Runs on macOS, Linux and Windows only right now. Mobile support will be added la
 - Locks:
   - Party mode locked until `storyCompleted=true`
   - Hard difficulty locked until `storyCompleted=true`
-- Game profile saves in file: `save/profile.cfg`
+- Game profile save path:
+  - Desktop: `save/profile.cfg`
+  - Android/iOS: app internal storage
 
 ## Controls
 - Mouse: click; drag-release = swipe left/right.
@@ -80,10 +82,40 @@ sudo pacman -S --needed base-devel git cmake alsa-lib mesa libx11 libxrandr libx
 
 ### Build
 ```bash
-cmake --fresh -S . -B build -DCMAKE_BUILD_TYPE=Release +cmake --build build -j
+cmake --fresh -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
 ```
 
 ### Run
 ```bash
 ./build/mw_recreation
 ```
+
+---
+
+## Build on Android
+### Requirements
+- Android Studio (with SDK + NDK + CMake installed)
+
+### Notes
+- Native C++ is built from the root `CMakeLists.txt`.
+- APK assets are taken directly from repo folder `assets/` via `sourceSets`; no manual copy step.
+
+### Build in Android Studio
+1. Open `android/` as project.
+2. Wait for Gradle sync.
+3. Build `app` (`Build > Make Project`) or run on device.
+
+### Build from CLI (inside `android/`)
+```bash
+./gradlew assembleDebug
+```
+
+APK output:
+`android/app/build/outputs/apk/debug/app-debug.apk`
+
+---
+
+## Runtime arguments (desktop)
+- `--no-splash`: skip splash and start from title.
+- `--no-title`: skip splash/title and open main menu directly.

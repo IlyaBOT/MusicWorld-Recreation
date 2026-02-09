@@ -4,7 +4,9 @@
 #include "screens/menu/MenuBg.h"
 #include "screens/menu/difficulty/DifficultyScreen.h"
 #include "core/DrawUtil.h"
+#include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <memory>
 
 namespace RecordsFlow {
@@ -59,8 +61,8 @@ void ModeScreen::draw(const DrawContext& ctx) {
 
 // RecordsScreen
 void RecordsScreen::onEnter() {
-    btnPrev.rect = { 8, 186, 34, 34 };
-    btnNext.rect = { 198, 186, 34, 34 };
+    btnPrev.rect = { 4, 170, 34, 34 };
+    btnNext.rect = { 202, 170, 34, 34 };
     btnPrev.bgRel = btnNext.bgRel = "sprites/UI/Menu/Buttons/1393.png";
     btnPrev.bgRelActive = btnNext.bgRelActive = "sprites/UI/Menu/Buttons/1395.png";
     btnPrev.labelRel = "sprites/UI/Menu/Buttons/backward-btn.png";
@@ -143,20 +145,71 @@ static const char* levelNameRel(int level) {
     return kNames[wrapLevel(level) - 1];
 }
 
-static const char* levelPreviewRel(int level) {
-    static constexpr const char* kPreview[] = {
-        "sprites/LevelBackgrounds/0585.png",
-        "sprites/LevelBackgrounds/0580.png",
-        "sprites/LevelBackgrounds/0580.png",
-        "sprites/LevelBackgrounds/0581.png",
-        "sprites/LevelBackgrounds/0582.png",
-        "sprites/LevelBackgrounds/0582.png",
-        "sprites/LevelBackgrounds/0583.png",
-        "sprites/LevelBackgrounds/0584.png",
-        "sprites/LevelBackgrounds/0584.png",
+struct TrackBgLayout {
+    const char* rel;
+    float offsetX;
+    float offsetY;
+    float zoom;
+};
+
+static const char* track10AnimatedBackgroundRel() {
+    static constexpr const char* kFrames[] = {
         "sprites/LevelBackgrounds/0586.png",
+        "sprites/LevelBackgrounds/0587.png",
+        "sprites/LevelBackgrounds/0588.png",
+        "sprites/LevelBackgrounds/0589.png",
+        "sprites/LevelBackgrounds/0590.png",
+        "sprites/LevelBackgrounds/0591.png",
+        "sprites/LevelBackgrounds/0592.png",
     };
-    return kPreview[wrapLevel(level) - 1];
+    constexpr int kFrameCount = (int)(sizeof(kFrames) / sizeof(kFrames[0]));
+    int frame = ((int)(GetTime() * 8.0f)) % kFrameCount;
+    return kFrames[frame];
+}
+
+static TrackBgLayout trackBackgroundLayout(int level) {
+    int trackIndex = wrapLevel(level) - 1;
+    switch (trackIndex) {
+    case 0: return {"sprites/LevelBackgrounds/0580.png", 0.0f, -20.0f, 1.0f};
+    case 1: return {"sprites/LevelBackgrounds/0581.png", 81.0f, 62.0f, 1.0f};
+    case 2: return {"sprites/LevelBackgrounds/0581.png", 32.0f, 3.0f, 1.0f};
+    case 3: return {"sprites/LevelBackgrounds/0582.png", 41.0f, -112.0f, 1.0f};
+    case 4: return {"sprites/LevelBackgrounds/0583.png", 17.0f, 59.0f, 1.0f};
+    case 5: return {"sprites/LevelBackgrounds/0583.png", 3.0f, -73.0f, 1.0f};
+    case 6: return {"sprites/LevelBackgrounds/0584.png", 1.0f, -85.0f, 1.0f};
+    case 7: return {"sprites/LevelBackgrounds/0585.png", -42.0f, -34.0f, 1.0f};
+    case 8: return {"sprites/LevelBackgrounds/0585.png", 7.0f, -111.0f, 1.0f};
+    case 9: return {"sprites/LevelBackgrounds/0586.png", 33.0f, -22.0f, 1.0f};
+    default: return {nullptr, 0.0f, 0.0f, 1.0f};
+    }
+}
+
+static bool drawTrackBackground(const DrawContext& ctx, Rectangle view, int level) {
+    int trackIndex = wrapLevel(level) - 1;
+    TrackBgLayout layout = trackBackgroundLayout(level);
+    const char* rel = (trackIndex == 9) ? track10AnimatedBackgroundRel() : layout.rel;
+    if (!rel || view.width <= 0 || view.height <= 0) return false;
+
+    auto bg = ctx.assets->tex(rel).tex;
+    if (!bg.id || bg.width <= 0 || bg.height <= 0) return false;
+
+    float zoom = std::max(0.1f, layout.zoom);
+    float srcW = std::min((float)bg.width, view.width / zoom);
+    float srcH = std::min((float)bg.height, view.height / zoom);
+
+    float centerX = (float)bg.width * 0.5f + layout.offsetX;
+    float centerY = (float)bg.height * 0.5f + layout.offsetY;
+    float srcX = std::clamp(centerX - srcW * 0.5f, 0.0f, (float)bg.width - srcW);
+    float srcY = std::clamp(centerY - srcH * 0.5f, 0.0f, (float)bg.height - srcH);
+
+    DrawTexturePro(
+        bg,
+        {srcX, srcY, srcW, srcH},
+        view,
+        {0.0f, 0.0f},
+        0.0f,
+        WHITE);
+    return true;
 }
 
 static Texture2D statDigit(const DrawContext& ctx, char ch) {
@@ -196,17 +249,11 @@ static void drawDigitsRight(const DrawContext& ctx, int value, float rightX, flo
     drawDigits(ctx, s, rightX - w, y);
 }
 
-static void drawPreview(Texture2D tex, Rectangle dst) {
+static void drawPreview(const DrawContext& ctx, int level, Rectangle dst) {
     DrawRectangleRounded(dst, 0.08f, 6, Fade(BLACK, 0.2f));
     DrawRectangleRoundedLinesEx(dst, 0.08f, 6, 1.0f, Fade(RAYWHITE, 0.45f));
-    if (!tex.id || tex.width <= 0 || tex.height <= 0) return;
-
-    float srcSize = (float)std::min(tex.width, tex.height);
-    float srcX = ((float)tex.width - srcSize) * 0.5f;
-    float srcY = ((float)tex.height - srcSize) * 0.5f;
-    Rectangle src = {srcX, srcY, srcSize, srcSize};
     Rectangle inner = {dst.x + 2.0f, dst.y + 2.0f, dst.width - 4.0f, dst.height - 4.0f};
-    DrawTexturePro(tex, src, inner, {0, 0}, 0.0f, WHITE);
+    drawTrackBackground(ctx, inner, level);
 }
 
 static void drawRecordsCard(const DrawContext& ctx, const std::string& mode, const std::string& diff, int level, float xOffset) {
@@ -220,7 +267,7 @@ static void drawRecordsCard(const DrawContext& ctx, const std::string& mode, con
     DrawLine((int)(inner.x + 8), (int)(inner.y + inner.height - 8), (int)(inner.x + inner.width - 8), (int)(inner.y + inner.height - 8), Color{89, 40, 158, 230});
 
     Rectangle preview = { card.x + 58.0f, card.y + 20.0f, 84.0f, 84.0f };
-    drawPreview(ctx.assets->tex(levelPreviewRel(level)).tex, preview);
+    drawPreview(ctx, level, preview);
 
     std::string lvlText = std::to_string(level) + "/10";
     drawDigits(ctx, lvlText, preview.x + preview.width - measureDigits(ctx, lvlText), preview.y + preview.height - 16.0f);
@@ -235,11 +282,12 @@ static void drawRecordsCard(const DrawContext& ctx, const std::string& mode, con
     float leftX = card.x + 30.0f;
     float rightX = card.x + card.width - 18.0f;
     float yAssessment = card.y + 132.0f;
-    float yScore = card.y + 160.0f;
-    float yGood = card.y + 188.0f;
-    float yPerfect = card.y + 216.0f;
-    float yCombo = card.y + 244.0f;
-    float yMaxCombo = card.y + 268.0f;
+    constexpr float kRowGap = 24.0f; // Reduced by 4px from previous spacing.
+    float yScore = yAssessment + kRowGap;
+    float yGood = yScore + kRowGap;
+    float yPerfect = yGood + kRowGap;
+    float yCombo = yPerfect + kRowGap;
+    float yMaxCombo = yCombo + 24.0f; // Keep combo <-> max combo spacing unchanged.
 
     DrawAt(ctx.assets->tex("sprites/UI/Menu/Russian/assessment-title.png").tex, leftX, yAssessment);
     DrawAt(ctx.assets->tex("sprites/UI/Menu/Russian/score-title.png").tex, leftX, yScore + 2.0f);
@@ -270,13 +318,21 @@ void RecordsScreen::draw(const DrawContext& ctx) {
     auto recordsTitle = ctx.assets->tex("sprites/UI/Menu/Russian/records-title.png").tex;
     if (recordsTitle.id) DrawTexture(recordsTitle, vw - recordsTitle.width - 4, 6, WHITE);
 
-    Vector2 diffBubbleCenter = {18.0f, 24.0f};
-    DrawCircleV(diffBubbleCenter, 24.0f, Color{171, 113, 237, 255});
-    DrawCircleLines((int)diffBubbleCenter.x, (int)diffBubbleCenter.y, 24.0f, Fade(RAYWHITE, 0.7f));
+    Vector2 diffBubbleCenter = {22.0f, 24.0f}; // Shift right by +4px.
+    auto diffBubble = ctx.assets->tex("sprites/UI/Menu/Buttons/1385.png").tex;
+    if (diffBubble.id) {
+        DrawTexture(diffBubble, (int)(diffBubbleCenter.x - diffBubble.width * 0.5f), (int)(diffBubbleCenter.y - diffBubble.height * 0.5f), WHITE);
+    } else {
+        DrawCircleV(diffBubbleCenter, 24.0f, Color{171, 113, 237, 255});
+        DrawCircleLines((int)diffBubbleCenter.x, (int)diffBubbleCenter.y, 24.0f, Fade(RAYWHITE, 0.7f));
+    }
     auto diffIcon = ctx.assets->tex(diffIconRel(diff)).tex;
     if (diffIcon.id) DrawTexture(diffIcon, (int)(diffBubbleCenter.x - diffIcon.width * 0.5f), (int)(diffBubbleCenter.y - diffIcon.height * 0.5f), WHITE);
     auto diffLabel = ctx.assets->tex(diffLabelRel(diff)).tex;
-    if (diffLabel.id) DrawTexture(diffLabel, 2, 52, WHITE);
+    if (diffLabel.id) {
+        constexpr int kCardTopY = 72;
+        DrawTexture(diffLabel, 2, kCardTopY - diffLabel.height - 2, WHITE);
+    }
 
     if (carousel.animating()) {
         float span = 212.0f;

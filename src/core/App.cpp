@@ -1,12 +1,31 @@
 #include "core/App.h"
 #include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <string_view>
+
+namespace {
+std::string profilePathForPlatform() {
+#if defined(PLATFORM_ANDROID)
+    const char* home = std::getenv("HOME");
+    if (home && home[0]) return std::string(home) + "/files/profile.cfg";
+    return "profile.cfg";
+#elif defined(PLATFORM_IOS)
+    const char* home = std::getenv("HOME");
+    if (home && home[0]) return std::string(home) + "/Documents/profile.cfg";
+    return "profile.cfg";
+#else
+    return "save/profile.cfg";
+#endif
+}
+}
 
 IScreen* App::top() { return stack_.empty() ? nullptr : stack_.back().get(); }
 
 void App::init() {
-    std::filesystem::create_directories("save");
+    profilePath_ = profilePathForPlatform();
+    std::filesystem::path profileDir = std::filesystem::path(profilePath_).parent_path();
+    if (!profileDir.empty()) std::filesystem::create_directories(profileDir);
     vs.init(240, 400);
     assets.init();
     InitAudioDevice();
