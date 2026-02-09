@@ -1,7 +1,6 @@
 # Music World Recreation
 
-Music World recreation for Android, iOS and PC, using C++17 + raylib + CMake.
-Desktop build is fully supported. Android project is in `android/` directory.
+Music World recreation for Android, iOS, PC and Mac, using C++17 with raylib and CMake. Desktop project is in `build/` directory, Android project is in `android/` directory, *iOS version WIP*.
 
 ## Screenshots
 <p>
