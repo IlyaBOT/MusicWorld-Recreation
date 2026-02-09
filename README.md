@@ -6,14 +6,19 @@ Desktop build is fully supported. Android project is in `android/` directory.
 ## Project progress
 - Virtual resolution **240x400** (scales with letterboxing).
 - Screens:
-  - Splash (LG Electronics and Com2us logos) 
-  - Title (Music World)
-  - Main Menu
-  - Mode select + Difficulty select
-  - Music Player (track carousel with swipe support + fake (temporary) EQ)
-  - Help [X]
-  - Settings (vibration toggle + music toggle + music remix toggle + 2 timing sliders. Language selection will be added later.)
-  - Records [X]
+  - Splash Screen (LG Electronics and Com2us logos) [✓]
+  - Title Screen (Music World logo) [✓]
+  - Main Menu [✓]
+  - Game mode select + Difficulty select scerens [✓]
+  - Music Player (Fully functional track carousel with swipe support + Working 10-band EQ) [✓]
+  - Settings (vibration toggle + music toggle + music remix toggle + 2 timing sliders. Language selection will be added later.) [✓]
+  - Records [✓]
+  - Tutorial [X]
+  - Levels:
+  - - Rythm game logic (Timer with accuracy assessment system and rewards) [X]
+  - - Game progress logic ("Track" map with the ability to unlock locations as you progress through the game) [X]
+  - - Animation and “throwing” Tuneys to the rhythm of the tap point [X]
+  - - Boss Fights [X]
 - Locks:
   - Party mode locked until `storyCompleted=true`
   - Hard difficulty locked until `storyCompleted=true`
