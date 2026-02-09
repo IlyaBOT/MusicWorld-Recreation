@@ -1,7 +1,7 @@
 # Music World Recreation
 
 Music World recreation for Android, iOS and PC, using C++17 + raylib + CMake.
-Desktop build is fully supported. Android project scaffolding is included in `android/`.
+Desktop build is fully supported. Android project is in `android/` directory.
 
 ## Project progress
 - Virtual resolution **240x400** (scales with letterboxing).
