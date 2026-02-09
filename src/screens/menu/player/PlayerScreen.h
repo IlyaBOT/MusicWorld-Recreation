@@ -28,6 +28,7 @@ private:
 
     ::Music music_{};
     bool musicOk_ = false;
+    bool eqProcessorAttached_ = false;
     bool playing_ = false;
     bool trackDirty_ = true;
     bool remixState_ = false;
