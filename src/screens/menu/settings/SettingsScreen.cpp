@@ -155,6 +155,8 @@ void SettingsScreen::onEnter() {
     vibroActive_ = musicActive_ = remixActive_ = volumeActive_ = notesActive_ = soundActive_ = false;
     draggingScrollbar_ = false;
     scrollbarGrabOffsetY_ = 0.0f;
+    draggingContentScroll_ = false;
+    contentScrollLastY_ = 0.0f;
     SetupMenuBackButton(back_, 400);
 }
 
@@ -309,11 +311,20 @@ static void drawScaleLabelsSprites(const DrawContext& ctx, Rectangle slider, con
 
 void SettingsScreen::update(const UpdateContext& ctx) {
     if (ctx.app) ctx.app->requestMenuMusic();
+    if (!kShowVolumePanel && ctx.profile) {
+        if (ctx.profile->masterVolume != 100) {
+            ctx.profile->masterVolume = 100;
+            if (ctx.app) ctx.app->saveProfile();
+        }
+        SetMasterVolume(1.0f);
+    }
 
     auto st = ctx.input->state();
     int vw = ctx.vs ? ctx.vs->vw : kDefaultVirtualW;
     int vh = ctx.vs ? ctx.vs->vh : kDefaultVirtualH;
     maxScrollY_ = calcMaxScroll(vh);
+    float contentBottomY = (float)vh - kContentBottomPad;
+    bool inContent = st.inViewport && st.mouseV.y >= kPanelStartY && st.mouseV.y <= contentBottomY;
 
     ScrollbarGeom sb = makeScrollbarGeom(vw, vh, scrollY_, maxScrollY_);
     if (st.inViewport) {
@@ -325,10 +336,40 @@ void SettingsScreen::update(const UpdateContext& ctx) {
 
     if (st.pressed && st.inViewport && CheckCollisionPointRec(st.mouseV, sb.thumb)) {
         draggingScrollbar_ = true;
+        draggingContentScroll_ = false;
         scrollbarGrabOffsetY_ = st.mouseV.y - sb.thumb.y;
+    }
+
+    Rectangle sliderNotesHit = {sliderNotes_.x - 10.0f, sliderNotes_.y - 10.0f, sliderNotes_.width + 20.0f, sliderNotes_.height + 20.0f};
+    Rectangle sliderSoundHit = {sliderSound_.x - 10.0f, sliderSound_.y - 10.0f, sliderSound_.width + 20.0f, sliderSound_.height + 20.0f};
+    Rectangle sliderVolumeHit = {sliderVolume_.x - 10.0f, sliderVolume_.y - 10.0f, sliderVolume_.width + 20.0f, sliderVolume_.height + 20.0f};
+
+    bool pointerOnButtons = CheckCollisionPointRec(st.mouseV, back_.rect)
+        || CheckCollisionPointRec(st.mouseV, btnVibOn_.rect)
+        || CheckCollisionPointRec(st.mouseV, btnVibOff_.rect)
+        || CheckCollisionPointRec(st.mouseV, btnMusicOn_.rect)
+        || CheckCollisionPointRec(st.mouseV, btnMusicOff_.rect)
+        || CheckCollisionPointRec(st.mouseV, btnRemixOn_.rect)
+        || CheckCollisionPointRec(st.mouseV, btnRemixOff_.rect);
+    bool pointerOnSlider = CheckCollisionPointRec(st.mouseV, sliderNotesHit)
+        || CheckCollisionPointRec(st.mouseV, sliderSoundHit)
+        || (kShowVolumePanel && CheckCollisionPointRec(st.mouseV, sliderVolumeHit));
+    bool pointerOnScrollbar = CheckCollisionPointRec(st.mouseV, sb.thumb);
+
+    if (st.pressed && inContent && maxScrollY_ > 0.0f && !pointerOnButtons && !pointerOnSlider && !pointerOnScrollbar) {
+        draggingContentScroll_ = true;
+        contentScrollLastY_ = st.mouseV.y;
     }
     if (st.released) {
         draggingScrollbar_ = false;
+        draggingContentScroll_ = false;
+    }
+    if (draggingContentScroll_ && st.down && st.inViewport && maxScrollY_ > 0.0f) {
+        float dragDy = st.mouseV.y - contentScrollLastY_;
+        if (std::fabs(dragDy) > 0.001f) {
+            scrollY_ = std::clamp(scrollY_ - dragDy, 0.0f, maxScrollY_);
+            contentScrollLastY_ = st.mouseV.y;
+        }
     }
     if (draggingScrollbar_ && st.down && st.inViewport && maxScrollY_ > 0.0f) {
         float travel = std::max(0.0f, sb.bar.height - sb.thumb.height);
@@ -345,8 +386,6 @@ void SettingsScreen::update(const UpdateContext& ctx) {
     auto clickBack = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport); };
     if (st.keyBack || clickBack(back_)) { ctx.app->saveProfile(); ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }
 
-    float contentBottomY = (float)vh - kContentBottomPad;
-    bool inContent = st.inViewport && st.mouseV.y >= kPanelStartY && st.mouseV.y <= contentBottomY;
     auto click = [&](ui::SpriteButton& b){ return b.update(st.mouseV, st.down && inContent, st.pressed && inContent, st.released && inContent); };
 
     if (click(btnVibOn_) && !ctx.profile->vibration) {
@@ -383,7 +422,10 @@ void SettingsScreen::update(const UpdateContext& ctx) {
     }
 
     auto beginDrag = [&](Rectangle r, bool& dragging){
-        if (st.pressed && inContent && CheckCollisionPointRec(st.mouseV, {r.x-10, r.y-10, r.width+20, r.height+20})) dragging = true;
+        if (st.pressed && inContent && CheckCollisionPointRec(st.mouseV, {r.x-10, r.y-10, r.width+20, r.height+20})) {
+            dragging = true;
+            draggingContentScroll_ = false;
+        }
         if (st.released) dragging = false;
     };
 

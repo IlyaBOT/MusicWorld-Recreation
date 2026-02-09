@@ -23,9 +23,15 @@ constexpr float kTitleReplayDelaySec = 1.0f;
 constexpr float kTapBottomMarginPx = 15.0f;
 
 std::string ResolvePath(const char* primary, const char* fallback) {
-    if (FileExists(Assets::A(primary).c_str())) return primary;
-    if (FileExists(Assets::A(fallback).c_str())) return fallback;
-    return primary;
+    Image p = LoadImage(Assets::A(primary).c_str());
+    bool hasPrimary = (p.data != nullptr);
+    if (hasPrimary) UnloadImage(p);
+    if (hasPrimary) return primary;
+
+    Image f = LoadImage(Assets::A(fallback).c_str());
+    bool hasFallback = (f.data != nullptr);
+    if (hasFallback) UnloadImage(f);
+    return hasFallback ? fallback : primary;
 }
 
 void DrawTiled(Texture2D tile, int vw, int vh) {
@@ -130,10 +136,13 @@ bool TitleScreen::loadTitleMusic(const std::string& rel) {
     unloadTitleMusic();
 
     std::string musicPath = Assets::A(rel);
-    if (!FileExists(musicPath.c_str())) return false;
-
     titleMusic_ = LoadMusicStream(musicPath.c_str());
     titleMusicOk_ = (titleMusic_.ctxData != nullptr);
+    if (!titleMusicOk_ && rel != kTitleMusicRel) {
+        musicPath = Assets::A(kTitleMusicRel);
+        titleMusic_ = LoadMusicStream(musicPath.c_str());
+        titleMusicOk_ = (titleMusic_.ctxData != nullptr);
+    }
     if (!titleMusicOk_) {
         titleMusic_ = {};
         return false;

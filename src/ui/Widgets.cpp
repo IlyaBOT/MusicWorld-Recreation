@@ -54,6 +54,9 @@ bool SpriteButton::update(Vector2 p, bool down, bool pressedEvt, bool releasedEv
 void SpriteButton::draw(Assets& assets) const {
     Color tint = enabled ? WHITE : Fade(WHITE, 0.45f);
     bool active = (hovered || pressed);
+#if defined(PLATFORM_ANDROID) || defined(ANDROID) || defined(__ANDROID__) || defined(PLATFORM_IOS)
+    active = pressed;
+#endif
 
     if (!bgRel.empty()) {
         Texture2D t = assets.tex(bgRel).tex;

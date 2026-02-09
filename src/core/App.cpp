@@ -6,7 +6,7 @@
 
 namespace {
 std::string profilePathForPlatform() {
-#if defined(PLATFORM_ANDROID)
+#if defined(PLATFORM_ANDROID) || defined(ANDROID) || defined(__ANDROID__)
     const char* home = std::getenv("HOME");
     if (home && home[0]) return std::string(home) + "/files/profile.cfg";
     return "profile.cfg";
@@ -31,6 +31,9 @@ void App::init() {
     InitAudioDevice();
 
     profile.load(profilePath_);
+#if defined(PLATFORM_ANDROID) || defined(ANDROID) || defined(__ANDROID__) || defined(PLATFORM_IOS)
+    profile.masterVolume = 100;
+#endif
     SetMasterVolume(std::max(0.0f, std::min(1.0f, profile.masterVolume / 100.0f)));
     lastTime_ = (float)GetTime();
     quitRequested_ = false;
@@ -123,8 +126,13 @@ std::string App::resolveMusicRel(const std::string& rel) const {
     if (rel.rfind(kBasePrefix.data(), 0) != 0) return rel;
 
     std::string candidate = std::string(kRemixPrefix) + rel.substr(kBasePrefix.size());
+#if defined(PLATFORM_ANDROID) || defined(ANDROID) || defined(__ANDROID__) || defined(PLATFORM_IOS)
+    // APK/IPA assets are not reliably discoverable with FileExists(), try remix path directly.
+    return candidate;
+#else
     if (FileExists(Assets::A(candidate).c_str())) return candidate;
     return rel;
+#endif
 }
 
 void App::updateMenuMusic() {
@@ -152,17 +160,21 @@ void App::updateMenuMusic() {
         unloadMenuMusic();
         std::string rel = resolveMusicRel("music/menu.mp3");
         std::string path = Assets::A(rel);
-        if (FileExists(path.c_str())) {
+        menuMusic_ = LoadMusicStream(path.c_str());
+        menuMusicOk_ = (menuMusic_.ctxData != nullptr);
+        if (!menuMusicOk_ && rel != "music/menu.mp3") {
+            // Remix may be absent for some assets; gracefully fallback to original.
+            path = Assets::A("music/menu.mp3");
             menuMusic_ = LoadMusicStream(path.c_str());
             menuMusicOk_ = (menuMusic_.ctxData != nullptr);
-            if (menuMusicOk_) {
-                menuMusic_.looping = true;
-                SetMusicVolume(menuMusic_, 0.9f);
-                menuMusicStarted_ = false;
-                menuMusicRemixState_ = wantRemix;
-            } else {
-                menuMusic_ = {};
-            }
+        }
+        if (menuMusicOk_) {
+            menuMusic_.looping = true;
+            SetMusicVolume(menuMusic_, 0.9f);
+            menuMusicStarted_ = false;
+            menuMusicRemixState_ = wantRemix;
+        } else {
+            menuMusic_ = {};
         }
     }
 

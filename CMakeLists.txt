@@ -57,6 +57,12 @@ endif()
 target_include_directories(mw_recreation PRIVATE src)
 target_link_libraries(mw_recreation PRIVATE raylib)
 
+if (ANDROID)
+  # Keep NativeActivity entrypoint from raylib/native_app_glue in the final .so.
+  target_compile_definitions(mw_recreation PRIVATE PLATFORM_ANDROID)
+  target_link_options(mw_recreation PRIVATE "LINKER:-u,ANativeActivity_onCreate")
+endif()
+
 if (APPLE)
   target_link_libraries(mw_recreation PRIVATE "-framework Cocoa" "-framework IOKit" "-framework OpenGL")
 endif()

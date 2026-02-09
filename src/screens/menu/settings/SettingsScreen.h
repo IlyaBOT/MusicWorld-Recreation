@@ -34,4 +34,6 @@ private:
     float maxScrollY_ = 0.0f;
     bool draggingScrollbar_ = false;
     float scrollbarGrabOffsetY_ = 0.0f;
+    bool draggingContentScroll_ = false;
+    float contentScrollLastY_ = 0.0f;
 };

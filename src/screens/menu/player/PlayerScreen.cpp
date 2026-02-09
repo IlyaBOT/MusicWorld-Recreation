@@ -58,6 +58,19 @@ static constexpr TrackOrderEntry kTrackOrder[] = {
     {"PrinceShutter", 9, "sprites/UI/Menu/Russian/tracks/prince-shutter.png"},
 };
 
+static constexpr const char* kBundledTrackFiles[] = {
+    "1-MorningDew.mp3",
+    "2-Picnic.mp3",
+    "3-KissOfFlowercula.mp3",
+    "4-JungleDrum.mp3",
+    "5-WorshipTheWild.mp3",
+    "6-Kongga_sDance.mp3",
+    "7-FutureCity.mp3",
+    "8-ElectricalParade.mp3",
+    "9-SpaceInvader.mp3",
+    "10-PrinceShutter.mp3",
+};
+
 int extractTrackNumberPrefix(const std::string& s) {
     int value = 0;
     bool any = false;
@@ -378,7 +391,13 @@ static void drawCounterSprites(const DrawContext& ctx, const std::string& text, 
 
 void PlayerScreen::scanTracks() {
     tracks_.clear();
-    auto files = listAudio("assets/music/levels");
+#if defined(PLATFORM_ANDROID) || defined(ANDROID) || defined(__ANDROID__) || defined(PLATFORM_IOS)
+    std::vector<std::string> files;
+    files.reserve(sizeof(kBundledTrackFiles) / sizeof(kBundledTrackFiles[0]));
+    for (const char* name : kBundledTrackFiles) files.emplace_back(name);
+#else
+    auto files = listAudio(Assets::A("music/levels"));
+#endif
     int n = 0;
     for (auto& fn : files) {
         n++;
@@ -423,19 +442,28 @@ void PlayerScreen::loadTrack(const UpdateContext& ctx, int i) {
     }
 
     std::string rel = tracks_[i].fileRel;
-    if (ctx.app) rel = ctx.app->resolveMusicRel(rel);
-    std::string path = Assets::A(rel);
-    if (FileExists(path.c_str())) {
+    std::string baseRel = rel;
+    if (ctx.app) rel = ctx.app->resolveMusicRel(baseRel);
+
+    auto tryLoadMusic = [&](const std::string& relPath) {
+        std::string path = Assets::A(relPath);
         music_ = LoadMusicStream(path.c_str());
         musicOk_ = (music_.ctxData != nullptr);
-        if (musicOk_) {
-            SetMusicVolume(music_, 0.9f);
-            gEqSampleRate.store(music_.stream.sampleRate);
-            gEqChannels.store(music_.stream.channels);
-            ResetEqLevels();
-            AttachAudioStreamProcessor(music_.stream, PlayerMusicProcessorImpl);
-            eqProcessorAttached_ = true;
-        }
+    };
+
+    tryLoadMusic(rel);
+    if (!musicOk_ && rel != baseRel) {
+        // Some remix tracks have legacy filenames; fallback to original track.
+        tryLoadMusic(baseRel);
+    }
+
+    if (musicOk_) {
+        SetMusicVolume(music_, 0.9f);
+        gEqSampleRate.store(music_.stream.sampleRate);
+        gEqChannels.store(music_.stream.channels);
+        ResetEqLevels();
+        AttachAudioStreamProcessor(music_.stream, PlayerMusicProcessorImpl);
+        eqProcessorAttached_ = true;
     }
     if (musicOk_ && wasPlaying) {
         PlayMusicStream(music_);

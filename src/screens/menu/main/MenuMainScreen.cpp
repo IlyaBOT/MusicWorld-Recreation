@@ -9,12 +9,19 @@
 #include <memory>
 #include <string>
 
+static bool canLoadMenuTexture(const std::string& rel) {
+    Image img = LoadImage(Assets::A(rel).c_str());
+    bool ok = (img.data != nullptr);
+    if (ok) UnloadImage(img);
+    return ok;
+}
+
 static ui::SpriteButton makeItem(float y, const std::string& labelRel) {
     auto labelSelected = [&]() {
         constexpr const char* kExt = ".png";
         if (labelRel.size() <= 4 || labelRel.rfind(kExt) != labelRel.size() - 4) return labelRel;
         std::string candidate = labelRel.substr(0, labelRel.size() - 4) + "_selected.png";
-        return FileExists(Assets::A(candidate).c_str()) ? candidate : labelRel;
+        return canLoadMenuTexture(candidate) ? candidate : labelRel;
     };
 
     ui::SpriteButton b;

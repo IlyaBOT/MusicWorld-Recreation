@@ -87,7 +87,7 @@ void Assets::shutdown() {
 }
 
 std::string Assets::A(const std::string& rel) {
-#if defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS)
+#if defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS) || defined(ANDROID) || defined(__ANDROID__)
     return rel;
 #else
     return std::string("assets/") + rel;
@@ -100,16 +100,14 @@ TextureHandle Assets::tex(const std::string& relPath) {
 
     TextureHandle h{};
     std::string path = A(relPath);
-    if (FileExists(path.c_str())) {
-        if (IsBackgroundTexturePath(relPath)) {
-            h.tex = LoadTexture(path.c_str());
-        } else {
-            h.tex = LoadTextureWithChromaKey(path);
-            if (h.tex.id == 0) h.tex = LoadTexture(path.c_str());
-        }
-        h.ok = (h.tex.id != 0);
-        if (h.ok) SetTextureFilter(h.tex, TEXTURE_FILTER_POINT);
+    if (IsBackgroundTexturePath(relPath)) {
+        h.tex = LoadTexture(path.c_str());
+    } else {
+        h.tex = LoadTextureWithChromaKey(path);
+        if (h.tex.id == 0) h.tex = LoadTexture(path.c_str());
     }
+    h.ok = (h.tex.id != 0);
+    if (h.ok) SetTextureFilter(h.tex, TEXTURE_FILTER_POINT);
     if (!h.ok) h = missingTex_;
     tex_[relPath] = h;
     return h;
@@ -121,10 +119,8 @@ SoundHandle Assets::sfx(const std::string& relPath) {
 
     SoundHandle h{};
     std::string path = A(relPath);
-    if (FileExists(path.c_str())) {
-        h.snd = LoadSound(path.c_str());
-        h.ok = (h.snd.frameCount > 0);
-    }
+    h.snd = LoadSound(path.c_str());
+    h.ok = (h.snd.frameCount > 0);
     sfx_[relPath] = h;
     return h;
 }
