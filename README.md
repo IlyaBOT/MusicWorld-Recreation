@@ -174,7 +174,6 @@ source ~/.bashrc
 If you previously had `ndk.dir` in `local.properties` or saw `dubious ownership` during old CMake cache setup, reset Android native build cache and rebuild:
 ```bash
 rm -rf app/.cxx
-./gradlew assembleDebug
 ```
 
 ```bash

@@ -26,7 +26,6 @@ else()
   FetchContent_Declare(
     raylib
     URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
   FetchContent_MakeAvailable(raylib)
 endif()
