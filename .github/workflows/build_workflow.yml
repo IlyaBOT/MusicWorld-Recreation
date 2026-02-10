@@ -81,14 +81,14 @@ jobs:
       # directories on Visual Studio.
       - name: Upload artifact (Windows)
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mw_recreation-windows
           path: build\${{ matrix.build_type }}\mw_recreation.exe
 
       - name: Upload artifact (Unix)
         if: runner.os != 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mw_recreation-${{ matrix.os }}
           path: build/mw_recreation
