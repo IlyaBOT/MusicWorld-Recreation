@@ -6,6 +6,8 @@
     <application
         android:allowBackup="true"
         android:label="Music World - Recreation"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:hasCode="false">
 
         <activity

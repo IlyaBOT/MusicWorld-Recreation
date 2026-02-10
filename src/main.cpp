@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "core/App.h"
+#include "core/Assets.h"
 #include "core/BuildVersion.h"
 #include "screens/splash/SplashScreen.h"
 #include "screens/title/TitleScreen.h"
@@ -20,6 +21,15 @@ int main(int argc, char** argv) {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     const std::string windowTitle = std::string("Music World - Recreation v") + buildinfo::kVersion;
     InitWindow(432, 720, windowTitle.c_str());
+#if !defined(PLATFORM_ANDROID) && !defined(ANDROID) && !defined(__ANDROID__) && !defined(PLATFORM_IOS)
+#if !defined(_WIN32)
+    Image appIcon = LoadImage(Assets::A("sprites/icons/icon_256x256.png").c_str());
+    if (appIcon.data) {
+        SetWindowIcon(appIcon);
+        UnloadImage(appIcon);
+    }
+#endif
+#endif
     SetTargetFPS(60);
 
     App app;

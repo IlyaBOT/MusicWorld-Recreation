@@ -43,6 +43,7 @@ set(MW_RECREATION_SOURCES
 
   src/screens/splash/SplashScreen.cpp
   src/screens/title/TitleScreen.cpp
+  src/screens/debug/DebugWorldScreen.cpp
 
   src/screens/menu/main/MenuMainScreen.cpp
   src/screens/menu/mode/ModeSelectScreen.cpp
@@ -59,6 +60,20 @@ if (ANDROID)
   add_library(mw_recreation SHARED ${MW_RECREATION_SOURCES})
 else()
   add_executable(mw_recreation ${MW_RECREATION_SOURCES})
+endif()
+
+if (WIN32 AND NOT ANDROID)
+  set(MW_APP_ICON_ICO "${CMAKE_SOURCE_DIR}/assets/sprites/icons/icon.ico")
+  if (EXISTS "${MW_APP_ICON_ICO}")
+    file(TO_NATIVE_PATH "${MW_APP_ICON_ICO}" MW_APP_ICON_ICO_NATIVE)
+    string(REPLACE "\\" "\\\\" MW_APP_ICON_ICO_NATIVE_ESCAPED "${MW_APP_ICON_ICO_NATIVE}")
+    configure_file(
+      "${CMAKE_SOURCE_DIR}/tools/windows_app_icon.rc.in"
+      "${CMAKE_BINARY_DIR}/mw_app_icon.rc"
+      @ONLY
+    )
+    target_sources(mw_recreation PRIVATE "${CMAKE_BINARY_DIR}/mw_app_icon.rc")
+  endif()
 endif()
 
 target_include_directories(mw_recreation PRIVATE src)
