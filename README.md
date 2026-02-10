@@ -170,10 +170,15 @@ source ~/.bashrc
 2. Wait for Gradle sync.
 3. Build `app` (`Build > Make Project`) or run on device.
 
-### Build from CLI (inside `android/`)
+### Build from CLI (inside `android/` dir)
+If you previously had `ndk.dir` in `local.properties` or saw `dubious ownership` during old CMake cache setup, reset Android native build cache and rebuild:
 ```bash
-cd android
-printf "sdk.dir=%s\nndk.dir=%s\n" "$ANDROID_SDK_ROOT" "$ANDROID_SDK_ROOT/ndk/27.2.12479018" > local.properties
+rm -rf app/.cxx
+./gradlew assembleDebug
+```
+
+```bash
+printf "sdk.dir=%s\n" "$ANDROID_SDK_ROOT" > local.properties
 ./gradlew assembleDebug
 ```
 

@@ -25,8 +25,8 @@ else()
   endif()
   FetchContent_Declare(
     raylib
-    GIT_REPOSITORY https://github.com/raysan5/raylib.git
-    GIT_TAG        5.5
+    URL https://github.com/raysan5/raylib/archive/refs/tags/5.5.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
   FetchContent_MakeAvailable(raylib)
 endif()
