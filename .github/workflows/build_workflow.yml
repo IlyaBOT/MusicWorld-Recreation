@@ -1,0 +1,94 @@
+name: Build All Platforms
+
+on:
+  # Run the workflow on pushes to main and on pull requests
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    # Use a matrix to spin up jobs on Windows, macOS and Linux
+    strategy:
+      matrix:
+        include:
+          # Linux build (Ubuntu runners come with GCC/Clang)
+          - os: ubuntu-latest
+            build_type: Release
+            cmake_args: -DCMAKE_BUILD_TYPE=Release
+          # macOS build
+          - os: macos-latest
+            build_type: Release
+            cmake_args: -DCMAKE_BUILD_TYPE=Release
+          # Windows build with Visual Studio
+          - os: windows-latest
+            build_type: Release
+            cmake_args: -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Checkout the repository with submodules (assets and external code)
+      - name: Checkout source
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # Install build dependencies on Linux (Ubuntu).  These packages are
+      # listed in the repository README as required for raylib and C++.
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          # Essential build tools and CMake
+          sudo apt-get install -y build-essential git cmake \
+            libasound2-dev libx11-dev libxrandr-dev libxi-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
+            libxinerama-dev libwayland-dev libxkbcommon-dev
+
+      # Install dependencies on macOS.  Homebrew is used to install CMake.
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          # Ensure CMake is available; Xcode is preinstalled on the runner
+          brew install cmake
+
+      # Install dependencies on Windows.  Visual Studio 2022 is preinstalled
+      # on GitHub runners; ensure CMake is available via Chocolatey.
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake --installargs "ADD_CMAKE_TO_PATH=System" -y
+
+      # Configure the build.  The matrix.cmake_args handles generator and
+      # architecture differences.  On Linux and macOS we rely on the
+      # default Makefile generator; on Windows we use Visual Studio.
+      - name: Configure CMake
+        run: cmake -S . -B build ${{ matrix.cmake_args }}
+
+      # Build the project.  Use parallel builds when possible.
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: cmake --build build --parallel
+
+      # Upload build artifacts.  Separate steps are used for Windows and
+      # non‑Windows because the executable is generated into different
+      # directories on Visual Studio.
+      - name: Upload artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mw_recreation-windows
+          path: build\${{ matrix.build_type }}\mw_recreation.exe
+
+      - name: Upload artifact (Unix)
+        if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mw_recreation-${{ matrix.os }}
+          path: build/mw_recreation
