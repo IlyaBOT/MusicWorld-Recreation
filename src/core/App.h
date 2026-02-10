@@ -67,6 +67,7 @@ private:
     bool menuMusicStarted_ = false;
     bool menuMusicPaused_ = false;
     bool menuMusicRemixState_ = false;
+    bool f1WasDown_ = false;
 
     IScreen* top();
     void updateMenuMusic();

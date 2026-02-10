@@ -12,26 +12,27 @@ constexpr const char* kBgTile = "sprites/LevelBackgrounds/debugWorld_bg.png";
 constexpr int kVirtualW = 240;
 constexpr int kVirtualH = 400;
 
-constexpr float kBarX = 4.0f;
+constexpr float kBarX = 8.0f;
 constexpr float kBarY = 304.0f;
 constexpr float kBarW = 232.0f;
 constexpr float kBarH = 92.0f;
 constexpr float kBarPadX = 8.0f;
 constexpr float kBarPadY = 7.0f;
-constexpr float kButtonW = 56.0f;
+constexpr float kButtonW = 36.0f;
 constexpr float kButtonH = 36.0f;
 constexpr float kButtonGapY = 6.0f;
-constexpr float kButtonGapX = kButtonGapY;
+constexpr float kButtonGapX = 8.0f;
 constexpr int kRows = 2;
-constexpr int kCols = 4;
+constexpr int kCols = 5;
 constexpr float kScrollSpeed = 20.0f;
 constexpr int kHpMin = 0;
 constexpr int kHpMax = 25;
 constexpr int kHpDefault = 12;
-constexpr float kHpBarY = 1.0f;
+constexpr float kHpBarY = 16.0f;
 constexpr float kHpSegmentsStartX = 29.0f;
-constexpr float kHpSegmentsBottomPad = 9.0f;
+constexpr float kHpSegmentsTopPad = 1.0f;
 constexpr float kHpSegmentGapX = 1.0f;
+constexpr float kHpSegmentsOffsetY = 6.0f;
 constexpr float kHpBlinkFrequencyHz = 2.0f;
 constexpr float kGameOverGapY = 6.0f;
 
@@ -40,11 +41,11 @@ constexpr const char* kHpSegments[kHpMax] = {
     "sprites/UI/HealthBar/1196.png", "sprites/UI/HealthBar/1196.png", "sprites/UI/HealthBar/1196.png",
     "sprites/UI/HealthBar/1197.png", "sprites/UI/HealthBar/1197.png", "sprites/UI/HealthBar/1197.png",
     "sprites/UI/HealthBar/1198.png", "sprites/UI/HealthBar/1198.png", "sprites/UI/HealthBar/1198.png",
-    "sprites/UI/HealthBar/1199.png", "sprites/UI/HealthBar/1199.png", "sprites/UI/HealthBar/1199.png",
-    "sprites/UI/HealthBar/1203.png",
+    "sprites/UI/HealthBar/1199.png", "sprites/UI/HealthBar/1199.png", "sprites/UI/HealthBar/1203.png",
     "sprites/UI/HealthBar/1200.png", "sprites/UI/HealthBar/1200.png", "sprites/UI/HealthBar/1200.png",
     "sprites/UI/HealthBar/1201.png", "sprites/UI/HealthBar/1201.png", "sprites/UI/HealthBar/1201.png",
     "sprites/UI/HealthBar/1202.png", "sprites/UI/HealthBar/1202.png", "sprites/UI/HealthBar/1202.png",
+    "sprites/UI/HealthBar/1202.png"
 };
 
 void drawTiled(Texture2D tile, int vw, int vh) {
@@ -179,14 +180,14 @@ void DebugWorldScreen::draw(const DrawContext& ctx) {
         DrawTexture(hpBg, (int)hpBgX, (int)kHpBarY, WHITE);
 
         float segX = hpBgX + kHpSegmentsStartX;
-        float segBottom = kHpBarY + hpBg.height - kHpSegmentsBottomPad;
+        float segTop = kHpBarY + kHpSegmentsTopPad + kHpSegmentsOffsetY;
         int hpValue = std::clamp(hp_, kHpMin, kHpMax);
         float blinkPhase = std::fmod(bgAnimTimer_ * kHpBlinkFrequencyHz, 1.0f);
         bool blinkOn = blinkPhase < 0.5f;
         for (int i = 0; i < hpValue; ++i) {
             Texture2D seg = ctx.assets->tex(kHpSegments[i]).tex;
             if (!seg.id) continue;
-            float y = segBottom - seg.height;
+            float y = segTop;
             float x = segX + i * (seg.width + kHpSegmentGapX);
             Color tint = WHITE;
             if (i == hpValue - 1) tint = blinkOn ? WHITE : Fade(WHITE, 0.25f);

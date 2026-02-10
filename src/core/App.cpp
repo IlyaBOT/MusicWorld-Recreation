@@ -37,6 +37,7 @@ void App::init() {
     SetMasterVolume(std::max(0.0f, std::min(1.0f, profile.masterVolume / 100.0f)));
     lastTime_ = (float)GetTime();
     quitRequested_ = false;
+    f1WasDown_ = false;
 }
 
 void App::shutdown() {
@@ -82,7 +83,9 @@ void App::runOneFrame() {
     if (dt > 0.1f) dt = 0.1f;
 
     input.update(vs);
-    if (IsKeyPressed(KEY_F1)) debug = !debug;
+    bool f1Down = IsKeyDown(KEY_F1);
+    if (f1Down && !f1WasDown_) debug = !debug;
+    f1WasDown_ = f1Down;
 
     UpdateContext u{dt, &vs, &input, &assets, &profile, &toast, &debug, this};
     DrawContext d{&vs, &assets, &profile, &toast, debug};
