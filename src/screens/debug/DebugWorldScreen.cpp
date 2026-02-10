@@ -7,13 +7,7 @@
 #include <memory>
 
 namespace {
-constexpr const char* kBgFrames[] = {
-    "sprites/LevelBackgrounds/0577.png",
-    "sprites/LevelBackgrounds/0578.png",
-    "sprites/LevelBackgrounds/0579.png",
-};
-constexpr int kBgFrameCount = (int)(sizeof(kBgFrames) / sizeof(kBgFrames[0]));
-constexpr float kBgAnimFps = 16.0f;
+constexpr const char* kBgTile = "sprites/LevelBackgrounds/debugWorld_bg.png";
 
 constexpr int kVirtualW = 240;
 constexpr int kVirtualH = 400;
@@ -34,8 +28,8 @@ constexpr float kScrollSpeed = 20.0f;
 constexpr int kHpMin = 0;
 constexpr int kHpMax = 25;
 constexpr int kHpDefault = 12;
-constexpr float kHpBarY = 16.0f;
-constexpr float kHpSegmentsStartX = 16.0f;
+constexpr float kHpBarY = 1.0f;
+constexpr float kHpSegmentsStartX = 29.0f;
 constexpr float kHpSegmentsBottomPad = 9.0f;
 constexpr float kHpSegmentGapX = 1.0f;
 constexpr float kHpBlinkFrequencyHz = 2.0f;
@@ -75,6 +69,10 @@ void DebugWorldScreen::onEnter() {
         b.bgRel = "sprites/UI/Menu/Buttons/1391.png";
         b.bgRelActive = "sprites/UI/Menu/Buttons/1395.png";
     }
+    if (!buttons_.empty()) {
+        buttons_.front().labelRel = "sprites/UI/Menu/Buttons/0915.png";
+        buttons_.front().labelRelActive = "sprites/UI/Menu/Buttons/0915.png";
+    }
     if (buttons_.size() > (size_t)kCols) {
         buttons_[(size_t)kCols + 0].labelRel = "sprites/UI/Fonts/1003.png";
         buttons_[(size_t)kCols + 1].labelRel = "sprites/UI/Fonts/1004.png";
@@ -112,7 +110,6 @@ void DebugWorldScreen::rebuildButtons() {
 }
 
 void DebugWorldScreen::update(const UpdateContext& ctx) {
-    if (ctx.app) ctx.app->requestMenuMusic();
     if (!tuneysLoaded_ && ctx.assets) {
         assetsRef_ = ctx.assets;
         assetsRef_->preloadTuneySprites();
@@ -172,10 +169,9 @@ void DebugWorldScreen::update(const UpdateContext& ctx) {
 void DebugWorldScreen::draw(const DrawContext& ctx) {
     int vw = ctx.vs ? ctx.vs->vw : kVirtualW;
     int vh = ctx.vs ? ctx.vs->vh : kVirtualH;
-    int frame = ((int)(bgAnimTimer_ * kBgAnimFps)) % kBgFrameCount;
 
     ClearBackground(BLACK);
-    drawTiled(ctx.assets->tex(kBgFrames[frame]).tex, vw, vh);
+    drawTiled(ctx.assets->tex(kBgTile).tex, vw, vh);
 
     Texture2D hpBg = ctx.assets->tex("sprites/UI/HealthBar/1194.png").tex;
     if (hpBg.id) {
@@ -203,11 +199,6 @@ void DebugWorldScreen::draw(const DrawContext& ctx) {
 
     BeginScissorMode((int)barRect_.x, (int)barRect_.y, (int)barRect_.width, (int)barRect_.height);
     for (const auto& b : buttons_) b.draw(*ctx.assets);
-    if (!buttons_.empty()) {
-        auto overlay = ctx.assets->tex("sprites/UI/Menu/Buttons/0915.png").tex;
-        const Rectangle& first = buttons_.front().rect;
-        DrawCentered(overlay, first.x + first.width * 0.5f, first.y + first.height * 0.5f);
-    }
     EndScissorMode();
 
     if (hp_ <= 0) {
