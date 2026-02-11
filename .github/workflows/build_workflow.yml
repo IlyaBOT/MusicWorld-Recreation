@@ -20,7 +20,7 @@ jobs:
           # macOS build
           - os: macos-latest
             build_type: Release
-            cmake_args: -DCMAKE_BUILD_TYPE=Release
+            cmake_args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_BUILD_TYPE=Release
           # Windows build with Visual Studio
           - os: windows-latest
             build_type: Release

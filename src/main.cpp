@@ -23,7 +23,10 @@ int main(int argc, char** argv) {
     InitWindow(432, 720, windowTitle.c_str());
 #if !defined(PLATFORM_ANDROID) && !defined(ANDROID) && !defined(__ANDROID__) && !defined(PLATFORM_IOS)
 #if !defined(_WIN32)
-    Image appIcon = LoadImage(Assets::A("sprites/icons/icon_256x256.png").c_str());
+    Image appIcon = LoadImage(Assets::A("sprites/icons/icon_512x512.png").c_str());
+    if (!appIcon.data) {
+        appIcon = LoadImage(Assets::A("sprites/icons/icon_256x256.png").c_str());
+    }
     if (appIcon.data) {
         SetWindowIcon(appIcon);
         UnloadImage(appIcon);
