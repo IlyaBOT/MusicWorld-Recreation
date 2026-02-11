@@ -3,7 +3,7 @@
 #include "screens/menu/BackButton.h"
 #include "screens/menu/MenuBg.h"
 #include "screens/menu/SpritePath.h"
-#include "screens/gameplay/GameplayPlaceholderScreen.h"
+#include "screens/gameplay/GameMapScreen.h"
 #include "screens/menu/records/RecordsFlow.h"
 #include <algorithm>
 #include <memory>
@@ -70,7 +70,7 @@ void DifficultyScreen::update(const UpdateContext& ctx) {
 
     auto openSelected = [&](const char* diff) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
-        if (target_ == Target::Gameplay) ctx.app->push(std::make_unique<GameplayPlaceholderScreen>(mode_, diff));
+        if (target_ == Target::Gameplay) ctx.app->push(std::make_unique<GameMapScreen>(mode_, diff));
         else ctx.app->push(std::make_unique<RecordsFlow::RecordsScreen>(mode_, diff));
     };
 
@@ -79,7 +79,7 @@ void DifficultyScreen::update(const UpdateContext& ctx) {
     if (hardClicked) {
         ctx.app->playSfx("sounds/MenuSelect.wav");
         if (hardLocked) { ctx.toast->show("Locked (finish Story)"); return; }
-        if (target_ == Target::Gameplay) ctx.app->push(std::make_unique<GameplayPlaceholderScreen>(mode_, "hard"));
+        if (target_ == Target::Gameplay) ctx.app->push(std::make_unique<GameMapScreen>(mode_, "hard"));
         else ctx.app->push(std::make_unique<RecordsFlow::RecordsScreen>(mode_, "hard"));
         return;
     }

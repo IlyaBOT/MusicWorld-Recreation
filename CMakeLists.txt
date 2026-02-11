@@ -38,6 +38,7 @@ set(MW_RECREATION_SOURCES
   src/core/Input.cpp
   src/core/Profile.cpp
   src/core/VirtualScreen.cpp
+  src/game/HealthSystem.cpp
 
   src/ui/Widgets.cpp
 
@@ -53,6 +54,7 @@ set(MW_RECREATION_SOURCES
   src/screens/menu/settings/SettingsScreen.cpp
   src/screens/menu/records/RecordsFlow.cpp
 
+  src/screens/gameplay/GameMapScreen.cpp
   src/screens/gameplay/GameplayPlaceholderScreen.cpp
 )
 

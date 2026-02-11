@@ -1,6 +1,7 @@
 #pragma once
 #include "screens/IScreen.h"
 #include "ui/Widgets.h"
+#include "game/HealthSystem.h"
 #include <vector>
 
 class DebugWorldScreen : public IScreen {
@@ -21,7 +22,7 @@ private:
     bool draggingScroll_ = false;
     float dragStartMouseX_ = 0.0f;
     float dragStartScrollX_ = 0.0f;
-    int hp_ = 12;
+    HealthSystem health_{};
     bool tuneysLoaded_ = false;
     class Assets* assetsRef_ = nullptr;
 };

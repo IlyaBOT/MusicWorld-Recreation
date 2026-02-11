@@ -25,9 +25,6 @@ constexpr float kButtonGapX = 8.0f;
 constexpr int kRows = 2;
 constexpr int kCols = 5;
 constexpr float kScrollSpeed = 20.0f;
-constexpr int kHpMin = 0;
-constexpr int kHpMax = 25;
-constexpr int kHpDefault = 12;
 constexpr float kHpBarY = 16.0f;
 constexpr float kHpSegmentsStartX = 29.0f;
 constexpr float kHpSegmentsTopPad = 1.0f;
@@ -35,18 +32,6 @@ constexpr float kHpSegmentGapX = 1.0f;
 constexpr float kHpSegmentsOffsetY = 6.0f;
 constexpr float kHpBlinkFrequencyHz = 2.0f;
 constexpr float kGameOverGapY = 6.0f;
-
-constexpr const char* kHpSegments[kHpMax] = {
-    "sprites/UI/HealthBar/1195.png", "sprites/UI/HealthBar/1195.png", "sprites/UI/HealthBar/1195.png",
-    "sprites/UI/HealthBar/1196.png", "sprites/UI/HealthBar/1196.png", "sprites/UI/HealthBar/1196.png",
-    "sprites/UI/HealthBar/1197.png", "sprites/UI/HealthBar/1197.png", "sprites/UI/HealthBar/1197.png",
-    "sprites/UI/HealthBar/1198.png", "sprites/UI/HealthBar/1198.png", "sprites/UI/HealthBar/1198.png",
-    "sprites/UI/HealthBar/1199.png", "sprites/UI/HealthBar/1199.png", "sprites/UI/HealthBar/1203.png",
-    "sprites/UI/HealthBar/1200.png", "sprites/UI/HealthBar/1200.png", "sprites/UI/HealthBar/1200.png",
-    "sprites/UI/HealthBar/1201.png", "sprites/UI/HealthBar/1201.png", "sprites/UI/HealthBar/1201.png",
-    "sprites/UI/HealthBar/1202.png", "sprites/UI/HealthBar/1202.png", "sprites/UI/HealthBar/1202.png",
-    "sprites/UI/HealthBar/1202.png"
-};
 
 void drawTiled(Texture2D tile, int vw, int vh) {
     if (!tile.id || tile.width <= 0 || tile.height <= 0) return;
@@ -60,7 +45,7 @@ void drawTiled(Texture2D tile, int vw, int vh) {
 
 void DebugWorldScreen::onEnter() {
     bgAnimTimer_ = 0.0f;
-    hp_ = kHpDefault;
+    health_.reset();
     tuneysLoaded_ = false;
     assetsRef_ = nullptr;
     barRect_ = {kBarX, kBarY, kBarW, kBarH};
@@ -160,8 +145,8 @@ void DebugWorldScreen::update(const UpdateContext& ctx) {
     for (size_t i = 0; i < buttons_.size(); ++i) {
         auto& b = buttons_[i];
         if (b.update(st.mouseV, st.down && inBar, st.pressed && inBar, st.released && inBar)) {
-            if (i == (size_t)kCols + 0) hp_ = std::max(kHpMin, hp_ - 1);
-            if (i == (size_t)kCols + 1) hp_ = std::min(kHpMax, hp_ + 1);
+            if (i == (size_t)kCols + 0) health_.decrease(1);
+            if (i == (size_t)kCols + 1) health_.increase(1);
             ctx.app->playSfx("sounds/MenuSelect.wav");
         }
     }
@@ -181,11 +166,13 @@ void DebugWorldScreen::draw(const DrawContext& ctx) {
 
         float segX = hpBgX + kHpSegmentsStartX;
         float segTop = kHpBarY + kHpSegmentsTopPad + kHpSegmentsOffsetY;
-        int hpValue = std::clamp(hp_, kHpMin, kHpMax);
+        int hpValue = health_.value();
         float blinkPhase = std::fmod(bgAnimTimer_ * kHpBlinkFrequencyHz, 1.0f);
         bool blinkOn = blinkPhase < 0.5f;
         for (int i = 0; i < hpValue; ++i) {
-            Texture2D seg = ctx.assets->tex(kHpSegments[i]).tex;
+            const char* segRel = HealthSystem::segmentSpriteRel(i);
+            if (!segRel) continue;
+            Texture2D seg = ctx.assets->tex(segRel).tex;
             if (!seg.id) continue;
             float y = segTop;
             float x = segX + i * (seg.width + kHpSegmentGapX);
@@ -202,7 +189,7 @@ void DebugWorldScreen::draw(const DrawContext& ctx) {
     for (const auto& b : buttons_) b.draw(*ctx.assets);
     EndScissorMode();
 
-    if (hp_ <= 0) {
+    if (health_.isDepleted()) {
         Texture2D gameTex = ctx.assets->tex("sprites/UI/GameOver/game.png").tex;
         Texture2D overTex = ctx.assets->tex("sprites/UI/GameOver/over.png").tex;
         float gameCx = vw * 0.5f;
@@ -213,6 +200,6 @@ void DebugWorldScreen::draw(const DrawContext& ctx) {
 
     if (ctx.debug) {
         DrawRectangle(0, 34, 240, 14, Fade(BLACK, 0.35f));
-        DrawText(TextFormat("HP: %d", hp_), 4, 36, 12, YELLOW);
+        DrawText(TextFormat("HP: %d", health_.value()), 4, 36, 12, YELLOW);
     }
 }
