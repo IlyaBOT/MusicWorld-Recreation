@@ -73,60 +73,65 @@ jobs:
         if: runner.os == 'Windows'
         run: cmake --build build --config ${{ matrix.build_type }} --parallel
 
-      # Package executable and assets into ZIP and TAR archives on Windows
-      - name: Package app and assets (Windows)
+      # Package release for Windows: create a zip archive with the executable and assets
+      - name: Package release (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          # Create a staging directory for packaging
+          # Create staging directory
           New-Item -ItemType Directory -Force -Path packaged | Out-Null
           # Copy the Windows executable
           Copy-Item -Path "build\${{ matrix.build_type }}\mw_recreation.exe" -Destination packaged
           # Copy the assets directory
           Copy-Item -Path "assets" -Destination "packaged\assets" -Recurse
-          # Create a zip archive containing the binary and assets
-          Compress-Archive -Path packaged\* -DestinationPath "build\mw_recreation-windows.zip"
-          # Create a tar.gz archive containing the binary and assets
-          tar -czf "build\mw_recreation-windows.tar.gz" -C packaged .
+          # Create a zip archive containing the executable and assets
+          Compress-Archive -Path packaged\* -DestinationPath "windows-latest.zip"
 
-      # Upload packaged archives for Windows
-      - name: Upload packages (Windows)
+      # Upload packaged release for Windows
+      - name: Upload release (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: mw_recreation-windows-packages
-          path: |
-            build\mw_recreation-windows.zip
-            build\mw_recreation-windows.tar.gz
+          name: windows-latest
+          path: windows-latest.zip
 
       - name: Build (Unix)
         if: runner.os != 'Windows'
         run: cmake --build build --parallel
 
-      # Package executable and assets into ZIP and TAR archives on Unix
-      - name: Package app and assets (Unix)
-        if: runner.os != 'Windows'
+      # Package release for macOS: create a zip archive with the executable and assets
+      - name: Package release (macOS)
+        if: runner.os == 'macOS'
         run: |
-          # Create a staging directory for packaging
           mkdir -p packaged
-          # Copy the Unix binary
           cp build/mw_recreation packaged/
-          # Copy the assets directory
           cp -r assets packaged/assets
-          # Create a tar.gz archive containing the binary and assets
-          tar -czf build/mw_recreation-${{ matrix.os }}.tar.gz -C packaged .
-          # Create a zip archive containing the binary and assets
-          zip -r build/mw_recreation-${{ matrix.os }}.zip packaged
+          zip -r macos-latest.zip packaged
 
-      # Upload packaged archives for Unix
-      - name: Upload packages (Unix)
-        if: runner.os != 'Windows'
+      # Upload packaged release for macOS
+      - name: Upload release (macOS)
+        if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: mw_recreation-${{ matrix.os }}-packages
-          path: |
-            build/mw_recreation-${{ matrix.os }}.zip
-            build/mw_recreation-${{ matrix.os }}.tar.gz
+          name: macos-latest
+          path: macos-latest.zip
+
+      # Package release for Linux: create a tar.gz archive with the executable and assets
+      - name: Package release (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p packaged
+          cp build/mw_recreation packaged/
+          cp -r assets packaged/assets
+          tar -czf linux-latest.tar.gz -C packaged .
+
+      # Upload packaged release for Linux
+      - name: Upload release (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-latest
+          path: linux-latest.tar.gz
 
       # Upload build artifacts.  Separate steps are used for Windows and
       # non‑Windows because the executable is generated into different
