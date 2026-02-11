@@ -48,9 +48,11 @@ jobs:
           # Add sdkmanager to PATH
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses
+          # Install necessary Android components. We avoid inserting comments mid-command to
+          # ensure the backslash continuation works correctly. All arguments are quoted to
+          # prevent shell interpretation of semicolons.
           sdkmanager \
             "platform-tools" \
-            # Use platform 34 to match compileSdk/targetSdk in android/app/build.gradle
             "platforms;android-34" \
             "build-tools;34.0.0" \
             "ndk;27.2.12479018" \
