@@ -44,7 +44,8 @@ jobs:
           sudo apt-get install -y build-essential git cmake \
             libasound2-dev libx11-dev libxrandr-dev libxi-dev \
             libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
-            libxinerama-dev libwayland-dev libxkbcommon-dev
+            libxinerama-dev libwayland-dev libxkbcommon-dev \
+            zip
 
       # Install dependencies on macOS.  Homebrew is used to install CMake.
       - name: Install dependencies (macOS)
@@ -72,9 +73,60 @@ jobs:
         if: runner.os == 'Windows'
         run: cmake --build build --config ${{ matrix.build_type }} --parallel
 
+      # Package executable and assets into ZIP and TAR archives on Windows
+      - name: Package app and assets (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Create a staging directory for packaging
+          New-Item -ItemType Directory -Force -Path packaged | Out-Null
+          # Copy the Windows executable
+          Copy-Item -Path "build\${{ matrix.build_type }}\mw_recreation.exe" -Destination packaged
+          # Copy the assets directory
+          Copy-Item -Path "assets" -Destination "packaged\assets" -Recurse
+          # Create a zip archive containing the binary and assets
+          Compress-Archive -Path packaged\* -DestinationPath "build\mw_recreation-windows.zip"
+          # Create a tar.gz archive containing the binary and assets
+          tar -czf "build\mw_recreation-windows.tar.gz" -C packaged .
+
+      # Upload packaged archives for Windows
+      - name: Upload packages (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mw_recreation-windows-packages
+          path: |
+            build\mw_recreation-windows.zip
+            build\mw_recreation-windows.tar.gz
+
       - name: Build (Unix)
         if: runner.os != 'Windows'
         run: cmake --build build --parallel
+
+      # Package executable and assets into ZIP and TAR archives on Unix
+      - name: Package app and assets (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          # Create a staging directory for packaging
+          mkdir -p packaged
+          # Copy the Unix binary
+          cp build/mw_recreation packaged/
+          # Copy the assets directory
+          cp -r assets packaged/assets
+          # Create a tar.gz archive containing the binary and assets
+          tar -czf build/mw_recreation-${{ matrix.os }}.tar.gz -C packaged .
+          # Create a zip archive containing the binary and assets
+          zip -r build/mw_recreation-${{ matrix.os }}.zip packaged
+
+      # Upload packaged archives for Unix
+      - name: Upload packages (Unix)
+        if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mw_recreation-${{ matrix.os }}-packages
+          path: |
+            build/mw_recreation-${{ matrix.os }}.zip
+            build/mw_recreation-${{ matrix.os }}.tar.gz
 
       # Upload build artifacts.  Separate steps are used for Windows and
       # non‑Windows because the executable is generated into different
