@@ -9,9 +9,10 @@ on:
 
 jobs:
   # Android build job. Uses the Ubuntu runner to download the Android
-  # command‐line tools and NDK, configures CMake for Android, and
-  # packages the resulting APK with the assets folder. The APK is built
-  # targeting Android 7.0+ (platform level 24) for 64‑bit ARM (arm64‑v8a).
+  # command‑line tools, SDK, NDK, and CMake. Then it invokes the Gradle
+  # wrapper (android/gradlew) to build a release APK using the project under
+  # android/. The resulting APK and the repo's assets folder are packaged
+  # into a single zip. Note: minSdk is 24 (Android 7.0+), targetSdk is 34.
   android:
     runs-on: ubuntu-latest
     env:
@@ -25,7 +26,8 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: '11'
+          # Use JDK 17 to satisfy newer Android Gradle Plugin requirements
+          java-version: '17'
 
       - name: Install Android SDK and NDK
         run: |
@@ -48,37 +50,40 @@ jobs:
           yes | sdkmanager --licenses
           sdkmanager \
             "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;33.0.2" \
+            # Use platform 34 to match compileSdk/targetSdk in android/app/build.gradle
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
             "ndk;27.2.12479018" \
             "cmake;3.22.1"
 
-      - name: Configure Android build with CMake
+      # Build the Android APK using the Gradle wrapper included in the repository. The Gradle build
+      # will invoke CMake via externalNativeBuild and package the native library and assets into an APK.
+      - name: Build Android APK
         run: |
           set -e
-          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
-          cmake -S . -B build/android \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
-            -DANDROID_PLATFORM=android-24 \
-            -DANDROID_ABI=arm64-v8a
+          # Change into the android project directory where gradlew lives
+          cd android
+          # Ensure the wrapper is executable
+          chmod +x gradlew
+          # Build a release APK; adjust the task if you need debug (assembleDebug)
+          ./gradlew assembleRelease
 
-      - name: Build Android
-        run: |
-          cmake --build build/android --config Release --parallel
-
-      - name: Package Android binary and assets
+      - name: Package Android APK and assets
         run: |
           set -e
           # Create a staging directory for packaging
           mkdir -p packaged
-          # Copy the output APK (if it exists) or built library/executable
-          if [ -f build/android/mw_recreation.apk ]; then cp build/android/mw_recreation.apk packaged/; fi
-          if [ -f build/android/mw_recreation ]; then cp build/android/mw_recreation packaged/; fi
-          # Copy the assets directory
+          # Find the generated APK (release build) and copy it into packaged
+          APK_PATH=$(find android/app/build/outputs -type f -name "*.apk" | head -n 1 || true)
+          if [ -n "$APK_PATH" ]; then
+            cp "$APK_PATH" packaged/mw_recreation.apk
+          else
+            echo "No APK found; build may have failed" && exit 1
+          fi
+          # Copy the assets directory for convenience (the APK already includes them)
           cp -r assets packaged/assets
-          # Create a zip archive named android-latest.zip
-          zip -r android-latest.zip packaged
+          # Create a zip archive containing the APK and assets at the root of the zip
+          (cd packaged && zip -r ../android-latest.zip .)
 
       - name: Upload Android package
         uses: actions/upload-artifact@v4
@@ -93,6 +98,8 @@ jobs:
   # the deployment target below. Packaging simply zips the resulting
   # .app bundle together with the assets directory.
   ios:
+    # Temporarily disabled iOS build
+    if: false
     runs-on: macos-12
     steps:
       - name: Checkout source
