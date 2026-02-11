@@ -34,11 +34,15 @@ jobs:
           # Download the latest command line tools. The version number may need updating over time.
           curl -sSL -o cmdline-tools.zip \
             https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          # Remove any existing cmdline-tools to avoid nested directories
+          rm -rf cmdline-tools
           unzip -q cmdline-tools.zip
           rm cmdline-tools.zip
-          # Move cmdline-tools into the expected directory structure
-          mkdir -p cmdline-tools/latest
-          mv cmdline-tools/* cmdline-tools/latest/
+          # The zip extracts a folder named 'cmdline-tools'. Rename it to a temporary name
+          mv cmdline-tools cmdline-tools-temp
+          # Create the expected hierarchy and move the extracted tools into 'latest'
+          mkdir -p cmdline-tools
+          mv cmdline-tools-temp cmdline-tools/latest
           # Add sdkmanager to PATH
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
           yes | sdkmanager --licenses
