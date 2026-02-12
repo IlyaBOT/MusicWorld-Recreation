@@ -1,5 +1,8 @@
 # Music World Recreation
 
+[![Build All Platforms](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/build_workflow.yml/badge.svg)](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/build_workflow.yml)
+[![Build Mobile Applications](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/mobile_build.yml/badge.svg)](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/mobile_build.yml)
+
 Music World recreation for Android, iOS, PC and Mac, using C++17 with raylib and CMake. Desktop project is in `build/` directory, Android project is in `android/` directory, *iOS version WIP*.
 
 ## Screenshots
