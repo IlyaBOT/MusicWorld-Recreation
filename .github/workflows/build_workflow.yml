@@ -99,19 +99,25 @@ jobs:
         if: runner.os != 'Windows'
         run: cmake --build build --parallel
 
-      # Package release for macOS: create a zip archive with the executable and assets
-      # Generate a macOS .app bundle using the provided generator script and package it
+      # Package release for macOS: generate a .app bundle using the provided script and zip it
       - name: Package .app (macOS)
         if: runner.os == 'macOS'
         run: |
           set -e
           # Ensure the generator script is executable
           chmod +x tools/macos_app_generator.sh
-          # Run the script with the built binary and assets as arguments. This script
-          # should create a .app bundle in the current directory or in a known location.
-          tools/macos_app_generator.sh build/mw_recreation assets
-          # Find the generated .app bundle (assumes only one .app is generated)
-          APP_PATH=$(find . -name '*.app' -type d -print -quit)
+          # Run the generator script. Use --no-build so it reuses the binary built via CMake.
+          # Do not pass the binary or assets as positional arguments; the script reads them from
+          # the repository structure (build/mw_recreation and assets). This avoids the
+          # "unknown option" error seen previously.
+          tools/macos_app_generator.sh --no-build
+          # Determine the .app bundle name. The script creates
+          # "Music World Recreation.app" in the repository root.
+          APP_PATH="Music World Recreation.app"
+          if [ ! -d "$APP_PATH" ]; then
+            # Fallback: locate any .app directory just in case
+            APP_PATH=$(find . -name '*.app' -type d -print -quit)
+          fi
           if [ -z "$APP_PATH" ]; then
             echo "No .app bundle found after running macos_app_generator.sh" && exit 1
           fi
@@ -165,36 +171,30 @@ jobs:
           # Download linuxdeploy to bundle the AppImage
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy.AppImage
           chmod +x linuxdeploy.AppImage
-          # Build the AppImage; this produces a .AppImage file
-          # Select an icon to embed into the AppImage.
-          # Prefer icons from assets/sprites/icons directory (icon_256x256.png or icon_512x512.png). If neither exists,
-          # use the first PNG in assets/sprites/icons if present, otherwise first PNG anywhere in assets.
+          # Build the AppImage; this produces a file ending in .AppImage
+          # Select an icon for the AppImage. Prefer icons from assets/sprites/icons:
+          #  - First try 256x256, then 512x512.
+          #  - If neither exists, fall back to the first PNG in assets/sprites/icons, and finally any PNG in assets.
           if [ -f assets/sprites/icons/icon_256x256.png ]; then
             ICON_FILE="assets/sprites/icons/icon_256x256.png"
           elif [ -f assets/sprites/icons/icon_512x512.png ]; then
             ICON_FILE="assets/sprites/icons/icon_512x512.png"
           else
-            if [ -d assets/sprites/icons ]; then
-              ICON_FILE=$(find assets/sprites/icons -type f -name "*.png" -print -quit)
-            fi
+            ICON_FILE=$(find assets/sprites/icons -type f -name "*.png" | head -n 1)
             if [ -z "$ICON_FILE" ]; then
-              ICON_FILE=$(find assets -type f -name "*.png" -print -quit)
+              ICON_FILE=$(find assets -type f -name "*.png" | head -n 1)
             fi
           fi
-          # Copy the selected icon into AppDir for linuxdeploy to embed
           cp "$ICON_FILE" appimage-build/AppDir/mw_recreation.png
-          # Run linuxdeploy to build the AppImage
-          ./linuxdeploy.AppImage \
-            --appdir appimage-build/AppDir \
+          ./linuxdeploy.AppImage --appdir appimage-build/AppDir \
             --desktop-file appimage-build/AppDir/usr/share/applications/mw_recreation.desktop \
             --icon-file appimage-build/AppDir/mw_recreation.png \
             --output appimage
-          # Rename the generated .AppImage file to a predictable name
-          APPIMG=$(ls -1 *.AppImage | head -n 1)
+          # Rename the generated file to a predictable name. linuxdeploy outputs a file
+          # ending in .AppImage in the current directory (e.g. Music_World_Recreation-x86_64.AppImage).
+          APPIMG=$(find . -maxdepth 1 -name '*.AppImage' | head -n 1)
           if [ -n "$APPIMG" ]; then
             mv "$APPIMG" mw_recreation.AppImage
-          else
-            echo "No AppImage file generated" && exit 1
           fi
 
       - name: Package Linux .deb
