@@ -5,9 +5,23 @@
 
 void GameplayPlaceholderScreen::onEnter() {
     SetupMenuBackButton(back_, 400);
+    assetsRef_ = nullptr;
+    tuneysLoaded_ = false;
+}
+
+void GameplayPlaceholderScreen::onExit() {
+    if (tuneysLoaded_ && assetsRef_) assetsRef_->unloadTuneySprites();
+    assetsRef_ = nullptr;
+    tuneysLoaded_ = false;
 }
 
 void GameplayPlaceholderScreen::update(const UpdateContext& ctx) {
+    if (!tuneysLoaded_ && ctx.assets) {
+        assetsRef_ = ctx.assets;
+        assetsRef_->preloadTuneySprites();
+        tuneysLoaded_ = true;
+    }
+
     auto st = ctx.input->state();
     bool clickedBack = back_.update(st.mouseV, st.down && st.inViewport, st.pressed && st.inViewport, st.released && st.inViewport);
     if (st.keyBack || clickedBack) { ctx.app->pop(); ctx.app->playSfx("sounds/MenuBack.wav"); return; }

@@ -1,4 +1,7 @@
 #include "core/Assets.h"
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
 #include <string_view>
 
 namespace {
@@ -123,4 +126,61 @@ SoundHandle Assets::sfx(const std::string& relPath) {
     h.ok = (h.snd.frameCount > 0);
     sfx_[relPath] = h;
     return h;
+}
+
+void Assets::preloadTuneySprites() {
+    if (!tuneySpriteKeys_.empty()) return;
+
+    namespace fs = std::filesystem;
+    const fs::path root = fs::path(A("sprites/Tuneys"));
+    const std::string rootStr = root.generic_string();
+    std::error_code ec;
+    if (!fs::exists(root, ec) || !fs::is_directory(root, ec)) {
+        TraceLog(LOG_WARNING, "ASSETS: Tuney preload skipped, directory not found: %s", rootStr.c_str());
+        return;
+    }
+
+    std::vector<std::string> keys;
+    for (fs::recursive_directory_iterator it(root, fs::directory_options::skip_permission_denied, ec), end;
+         it != end; it.increment(ec)) {
+        if (ec) continue;
+        const fs::directory_entry& entry = *it;
+        if (!entry.is_regular_file(ec)) continue;
+
+        std::string ext = entry.path().extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(),
+                       [](unsigned char c) { return (char)std::tolower(c); });
+        if (ext != ".png") continue;
+
+        const std::string fullPath = entry.path().generic_string();
+        const std::string marker = "sprites/Tuneys/";
+        size_t pos = fullPath.find(marker);
+        if (pos == std::string::npos) continue;
+        std::string rel = fullPath.substr(pos);
+
+        auto h = tex(rel);
+        if (h.ok) keys.push_back(rel);
+    }
+
+    std::sort(keys.begin(), keys.end());
+    keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
+    tuneySpriteKeys_ = std::move(keys);
+    TraceLog(LOG_INFO, "ASSETS: Preloaded Tuney sprites: %i", (int)tuneySpriteKeys_.size());
+}
+
+void Assets::unloadTuneySprites() {
+    int unloadedCount = 0;
+    for (auto it = tex_.begin(); it != tex_.end();) {
+        if (it->first.rfind("sprites/Tuneys/", 0) != 0) {
+            ++it;
+            continue;
+        }
+        if (it->second.ok && (!missingTex_.ok || it->second.tex.id != missingTex_.tex.id)) {
+            UnloadTexture(it->second.tex);
+        }
+        ++unloadedCount;
+        it = tex_.erase(it);
+    }
+    tuneySpriteKeys_.clear();
+    TraceLog(LOG_INFO, "ASSETS: Unloaded Tuney sprites: %i", unloadedCount);
 }

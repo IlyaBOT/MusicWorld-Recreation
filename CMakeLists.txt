@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.18)
-set(MW_BUILD_VERSION "0.1")
+set(MW_BUILD_VERSION "0.2")
 if(EXISTS "${CMAKE_SOURCE_DIR}/VERSION")
   file(READ "${CMAKE_SOURCE_DIR}/VERSION" MW_BUILD_VERSION_RAW)
   string(STRIP "${MW_BUILD_VERSION_RAW}" MW_BUILD_VERSION)
   if(MW_BUILD_VERSION STREQUAL "")
-    set(MW_BUILD_VERSION "0.1")
+    set(MW_BUILD_VERSION "0.2")
   endif()
 endif()
 project(mw_recreation VERSION ${MW_BUILD_VERSION} LANGUAGES C CXX)
@@ -38,11 +38,13 @@ set(MW_RECREATION_SOURCES
   src/core/Input.cpp
   src/core/Profile.cpp
   src/core/VirtualScreen.cpp
+  src/game/HealthSystem.cpp
 
   src/ui/Widgets.cpp
 
   src/screens/splash/SplashScreen.cpp
   src/screens/title/TitleScreen.cpp
+  src/screens/debug/DebugWorldScreen.cpp
 
   src/screens/menu/main/MenuMainScreen.cpp
   src/screens/menu/mode/ModeSelectScreen.cpp
@@ -52,6 +54,7 @@ set(MW_RECREATION_SOURCES
   src/screens/menu/settings/SettingsScreen.cpp
   src/screens/menu/records/RecordsFlow.cpp
 
+  src/screens/gameplay/GameMapScreen.cpp
   src/screens/gameplay/GameplayPlaceholderScreen.cpp
 )
 
@@ -59,6 +62,20 @@ if (ANDROID)
   add_library(mw_recreation SHARED ${MW_RECREATION_SOURCES})
 else()
   add_executable(mw_recreation ${MW_RECREATION_SOURCES})
+endif()
+
+if (WIN32 AND NOT ANDROID)
+  set(MW_APP_ICON_ICO "${CMAKE_SOURCE_DIR}/assets/sprites/icons/icon.ico")
+  if (EXISTS "${MW_APP_ICON_ICO}")
+    file(TO_NATIVE_PATH "${MW_APP_ICON_ICO}" MW_APP_ICON_ICO_NATIVE)
+    string(REPLACE "\\" "\\\\" MW_APP_ICON_ICO_NATIVE_ESCAPED "${MW_APP_ICON_ICO_NATIVE}")
+    configure_file(
+      "${CMAKE_SOURCE_DIR}/tools/windows_app_icon.rc.in"
+      "${CMAKE_BINARY_DIR}/mw_app_icon.rc"
+      @ONLY
+    )
+    target_sources(mw_recreation PRIVATE "${CMAKE_BINARY_DIR}/mw_app_icon.rc")
+  endif()
 endif()
 
 target_include_directories(mw_recreation PRIVATE src)

@@ -77,6 +77,19 @@ cmake --build build -j
 ./build/mw_recreation
 ```
 
+or use script for make ready macOS application:
+
+```bash
+# from repo root
+chmod +x tools/macos_app_generator.sh
+./tools/macos_app_generator.sh
+```
+
+Script output:
+- Creates `Music World Recreation.app` in repo root.
+- Reads app version from `VERSION` for `Info.plist`.
+- Codesigns app with ad-hoc signature and opens it.
+
 ---
 
 ## Build on Linux

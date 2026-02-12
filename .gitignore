@@ -6,6 +6,7 @@ save/
 build/
 cmake-build-*/
 compile_commands.json
+Music World Recreation.app
 
 # Android/Gradle local and generated files
 android/local.properties
@@ -22,6 +23,6 @@ android/captures/
 .vscode/
 *.iml
 
-# OS junk
+# macOS junk
 .DS_Store
 Thumbs.db

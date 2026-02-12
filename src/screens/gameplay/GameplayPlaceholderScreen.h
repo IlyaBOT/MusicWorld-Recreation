@@ -7,10 +7,13 @@ class GameplayPlaceholderScreen : public IScreen {
 public:
     GameplayPlaceholderScreen(std::string mode, std::string diff) : mode_(std::move(mode)), diff_(std::move(diff)) {}
     void onEnter() override;
+    void onExit() override;
     void update(const UpdateContext& ctx) override;
     void draw(const DrawContext& ctx) override;
 private:
     std::string mode_;
     std::string diff_;
     ui::SpriteButton back_{};
+    class Assets* assetsRef_ = nullptr;
+    bool tuneysLoaded_ = false;
 };
