@@ -67,31 +67,28 @@ jobs:
           cd android
           # Ensure the wrapper is executable
           chmod +x gradlew
-          # Build a release APK; adjust the task if you need debug (assembleDebug)
-          ./gradlew assembleRelease
+          # Build a debug APK instead of release. Debug builds are automatically signed
+          # with the debug keystore and can be installed on devices/emulators without
+          # additional signing configuration. If you later add a signingConfig for
+          # release builds, you can switch back to assembleRelease.
+          ./gradlew assembleDebug
 
-      - name: Package Android APK and assets
+      - name: Prepare Android APK for upload
         run: |
           set -e
-          # Create a staging directory for packaging
-          mkdir -p packaged
-          # Find the generated APK (release build) and copy it into packaged
+          # Find the generated APK (debug build) and copy it to a predictable location
           APK_PATH=$(find android/app/build/outputs -type f -name "*.apk" | head -n 1 || true)
           if [ -n "$APK_PATH" ]; then
-            cp "$APK_PATH" packaged/mw_recreation.apk
+            cp "$APK_PATH" mw_recreation.apk
           else
             echo "No APK found; build may have failed" && exit 1
           fi
-          # Copy the assets directory for convenience (the APK already includes them)
-          cp -r assets packaged/assets
-          # Create a zip archive containing the APK and assets at the root of the zip
-          (cd packaged && zip -r ../android-latest.zip .)
 
-      - name: Upload Android package
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: android-latest
-          path: android-latest.zip
+          path: mw_recreation.apk
 
   # iOS build job. Runs on a macOS runner because iOS compilation requires
   # Xcode. It configures CMake to generate an Xcode project targeting
