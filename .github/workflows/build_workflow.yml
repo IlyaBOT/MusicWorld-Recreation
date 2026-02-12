@@ -1,4 +1,4 @@
-name: Build All Platforms
+name: Build for PC/Mac
 
 on:
   # Run the workflow on pushes to main and on pull requests
@@ -85,15 +85,15 @@ jobs:
           # Copy the assets directory
           Copy-Item -Path "assets" -Destination "packaged\assets" -Recurse
           # Create a zip archive containing the executable and assets
-          Compress-Archive -Path packaged\* -DestinationPath "windows-latest.zip"
+          Compress-Archive -Path packaged\* -DestinationPath "music-world-windows-x64.zip"
 
       # Upload packaged release for Windows
       - name: Upload release (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: windows-latest
-          path: windows-latest.zip
+          name: music-world-windows-x64
+          path: music-world-windows-x64.zip
 
       - name: Build (Unix)
         if: runner.os != 'Windows'
@@ -122,15 +122,15 @@ jobs:
             echo "No .app bundle found after running macos_app_generator.sh" && exit 1
           fi
           # Compress the .app bundle into a zip for distribution
-          zip -r macos-latest.zip "$APP_PATH"
+          zip -r music-world-macos-universal.zip "$APP_PATH"
 
       # Upload packaged .app for macOS
       - name: Upload release (macOS)
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: macos-latest
-          path: macos-latest.zip
+          name: music-world-macos-universal
+          path: music-world-macos-universal.zip
 
       # Package release for Linux: create a tar.gz archive with the executable and assets
       - name: Package release (Linux)
@@ -139,15 +139,15 @@ jobs:
           mkdir -p packaged
           cp build/mw_recreation packaged/
           cp -r assets packaged/assets
-          tar -czf linux-latest.tar.gz -C packaged .
+          tar -czf music-world-linux-x64.tar.gz -C packaged .
 
       # Upload packaged release for Linux
       - name: Upload release (Linux)
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: linux-latest
-          path: linux-latest.tar.gz
+          name: music-world-linux-x64
+          path: music-world-linux-x64.tar.gz
 
       # Build and package additional Linux distributions: AppImage and .deb
       - name: Package Linux AppImage
@@ -194,7 +194,7 @@ jobs:
           # ending in .AppImage in the current directory (e.g. Music_World_Recreation-x86_64.AppImage).
           APPIMG=$(find . -maxdepth 1 -name '*.AppImage' | head -n 1)
           if [ -n "$APPIMG" ]; then
-            mv "$APPIMG" mw_recreation.AppImage
+            mv "$APPIMG" music-world-linux-x64.AppImage
           fi
 
       - name: Package Linux .deb
@@ -209,7 +209,7 @@ jobs:
           mkdir -p debpkg/DEBIAN
           cat > debpkg/DEBIAN/control <<'EOF'
           Package: mw-recreation
-          Version: 1.0.0
+          Version: 0.2
           Section: games
           Priority: optional
           Architecture: amd64
@@ -217,35 +217,35 @@ jobs:
           Description: Music World Recreation game built with raylib
           EOF
           # Build the Debian package
-          dpkg-deb --build debpkg mw_recreation.deb
+          dpkg-deb --build debpkg music-world-debian-x64.deb
 
       - name: Upload Linux AppImage
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: linux-appimage
-          path: mw_recreation.AppImage
+          name: music-world-linux-x64
+          path: music-world-linux-x64.AppImage
 
       - name: Upload Linux deb
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: linux-deb
-          path: mw_recreation.deb
+          name: music-world-debian-x64
+          path: music-world-debian-x64.deb
 
       # Upload build artifacts.  Separate steps are used for Windows and
       # non‑Windows because the executable is generated into different
       # directories on Visual Studio.
-      - name: Upload artifact (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: mw_recreation-windows
-          path: build\${{ matrix.build_type }}\mw_recreation.exe
+      #- name: Upload artifact (Windows)
+      #  if: runner.os == 'Windows'
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: mw_recreation-windows
+      #    path: build\${{ matrix.build_type }}\mw_recreation.exe
 
-      - name: Upload artifact (Unix)
-        if: runner.os != 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: mw_recreation-${{ matrix.os }}
-          path: build/mw_recreation
+      #- name: Upload artifact (Unix)
+      #  if: runner.os != 'Windows'
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: mw_recreation-${{ matrix.os }}
+      #    path: build/mw_recreation
