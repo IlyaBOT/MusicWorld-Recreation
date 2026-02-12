@@ -1,4 +1,4 @@
-name: Build Mobile Applications
+name: Build for Mobile
 
 on:
   # Trigger the mobile build on pushes to main and pull requests
