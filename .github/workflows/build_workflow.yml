@@ -165,23 +165,37 @@ jobs:
           # Download linuxdeploy to bundle the AppImage
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy.AppImage
           chmod +x linuxdeploy.AppImage
-          # Build the AppImage; this produces a file ending in .AppImage
-          # Copy a specific icon (prefer 256x256 then 512x512) into the AppDir for linuxdeploy.
-          # If these files are not present in the repository, fall back to the first PNG in assets.
-          if [ -f icon_output/icon_256x256.png ]; then
-            ICON_FILE="icon_output/icon_256x256.png"
-          elif [ -f icon_output/icon_512x512.png ]; then
-            ICON_FILE="icon_output/icon_512x512.png"
+          # Build the AppImage; this produces a .AppImage file
+          # Select an icon to embed into the AppImage.
+          # Prefer icons from assets/sprites/icons directory (icon_256x256.png or icon_512x512.png). If neither exists,
+          # use the first PNG in assets/sprites/icons if present, otherwise first PNG anywhere in assets.
+          if [ -f assets/sprites/icons/icon_256x256.png ]; then
+            ICON_FILE="assets/sprites/icons/icon_256x256.png"
+          elif [ -f assets/sprites/icons/icon_512x512.png ]; then
+            ICON_FILE="assets/sprites/icons/icon_512x512.png"
           else
-            ICON_FILE=$(find assets -type f -name "*.png" | head -n 1)
+            if [ -d assets/sprites/icons ]; then
+              ICON_FILE=$(find assets/sprites/icons -type f -name "*.png" -print -quit)
+            fi
+            if [ -z "$ICON_FILE" ]; then
+              ICON_FILE=$(find assets -type f -name "*.png" -print -quit)
+            fi
           fi
+          # Copy the selected icon into AppDir for linuxdeploy to embed
           cp "$ICON_FILE" appimage-build/AppDir/mw_recreation.png
-          ./linuxdeploy.AppImage --appdir appimage-build/AppDir \
+          # Run linuxdeploy to build the AppImage
+          ./linuxdeploy.AppImage \
+            --appdir appimage-build/AppDir \
             --desktop-file appimage-build/AppDir/usr/share/applications/mw_recreation.desktop \
             --icon-file appimage-build/AppDir/mw_recreation.png \
             --output appimage
-          # Rename the generated file to a predictable name
-          mv *.AppImage mw_recreation.AppImage
+          # Rename the generated .AppImage file to a predictable name
+          APPIMG=$(ls -1 *.AppImage | head -n 1)
+          if [ -n "$APPIMG" ]; then
+            mv "$APPIMG" mw_recreation.AppImage
+          else
+            echo "No AppImage file generated" && exit 1
+          fi
 
       - name: Package Linux .deb
         if: runner.os == 'Linux'
