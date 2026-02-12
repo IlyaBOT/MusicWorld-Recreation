@@ -20,7 +20,7 @@ jobs:
           # macOS build
           - os: macos-latest
             build_type: Release
-            cmake_args: -DCMAKE_BUILD_TYPE=Release
+            cmake_args: -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_BUILD_TYPE=Release
           # Windows build with Visual Studio
           - os: windows-latest
             build_type: Release
@@ -45,7 +45,7 @@ jobs:
             libasound2-dev libx11-dev libxrandr-dev libxi-dev \
             libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev \
             libxinerama-dev libwayland-dev libxkbcommon-dev \
-            zip
+            zip wget dpkg-dev
 
       # Install dependencies on macOS.  Homebrew is used to install CMake.
       - name: Install dependencies (macOS)
@@ -166,7 +166,20 @@ jobs:
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy.AppImage
           chmod +x linuxdeploy.AppImage
           # Build the AppImage; this produces a file ending in .AppImage
-          ./linuxdeploy.AppImage --appdir appimage-build/AppDir --output appimage
+          # Copy a specific icon (prefer 256x256 then 512x512) into the AppDir for linuxdeploy.
+          # If these files are not present in the repository, fall back to the first PNG in assets.
+          if [ -f icon_output/icon_256x256.png ]; then
+            ICON_FILE="icon_output/icon_256x256.png"
+          elif [ -f icon_output/icon_512x512.png ]; then
+            ICON_FILE="icon_output/icon_512x512.png"
+          else
+            ICON_FILE=$(find assets -type f -name "*.png" | head -n 1)
+          fi
+          cp "$ICON_FILE" appimage-build/AppDir/mw_recreation.png
+          ./linuxdeploy.AppImage --appdir appimage-build/AppDir \
+            --desktop-file appimage-build/AppDir/usr/share/applications/mw_recreation.desktop \
+            --icon-file appimage-build/AppDir/mw_recreation.png \
+            --output appimage
           # Rename the generated file to a predictable name
           mv *.AppImage mw_recreation.AppImage
 
