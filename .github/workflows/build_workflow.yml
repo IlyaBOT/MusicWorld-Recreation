@@ -141,8 +141,8 @@ jobs:
           cp -r assets packaged/assets
           tar -czf music-world-linux-x64.tar.gz -C packaged .
 
-      # Upload packaged release for Linux
-      - name: Upload release (Linux)
+      # Upload packaged release for Linux (tar.gz)
+      - name: Upload release (Linux tar.gz)
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
@@ -219,12 +219,14 @@ jobs:
           # Build the Debian package
           dpkg-deb --build debpkg music-world-debian-x64.deb
 
+      # Upload Linux AppImage
       - name: Upload Linux AppImage
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: music-world-linux-x64
+          name: music-world-linux-x64-appimage
           path: music-world-linux-x64.AppImage
+
 
       - name: Upload Linux deb
         if: runner.os == 'Linux'
