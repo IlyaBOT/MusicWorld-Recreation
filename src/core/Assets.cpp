@@ -133,8 +133,12 @@ void Assets::preloadTuneySprites() {
 
     namespace fs = std::filesystem;
     const fs::path root = fs::path(A("sprites/Tuneys"));
+    const std::string rootStr = root.generic_string();
     std::error_code ec;
-    if (!fs::exists(root, ec) || !fs::is_directory(root, ec)) return;
+    if (!fs::exists(root, ec) || !fs::is_directory(root, ec)) {
+        TraceLog(LOG_WARNING, "ASSETS: Tuney preload skipped, directory not found: %s", rootStr.c_str());
+        return;
+    }
 
     std::vector<std::string> keys;
     for (fs::recursive_directory_iterator it(root, fs::directory_options::skip_permission_denied, ec), end;
@@ -161,9 +165,11 @@ void Assets::preloadTuneySprites() {
     std::sort(keys.begin(), keys.end());
     keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
     tuneySpriteKeys_ = std::move(keys);
+    TraceLog(LOG_INFO, "ASSETS: Preloaded Tuney sprites: %i", (int)tuneySpriteKeys_.size());
 }
 
 void Assets::unloadTuneySprites() {
+    int unloadedCount = 0;
     for (auto it = tex_.begin(); it != tex_.end();) {
         if (it->first.rfind("sprites/Tuneys/", 0) != 0) {
             ++it;
@@ -172,7 +178,9 @@ void Assets::unloadTuneySprites() {
         if (it->second.ok && (!missingTex_.ok || it->second.tex.id != missingTex_.tex.id)) {
             UnloadTexture(it->second.tex);
         }
+        ++unloadedCount;
         it = tex_.erase(it);
     }
     tuneySpriteKeys_.clear();
+    TraceLog(LOG_INFO, "ASSETS: Unloaded Tuney sprites: %i", unloadedCount);
 }

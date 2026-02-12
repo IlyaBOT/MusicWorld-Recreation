@@ -56,8 +56,8 @@ void DebugWorldScreen::onEnter() {
         b.bgRelActive = "sprites/UI/Menu/Buttons/1395.png";
     }
     if (!buttons_.empty()) {
-        buttons_.front().labelRel = "sprites/UI/Menu/Buttons/0915.png";
-        buttons_.front().labelRelActive = "sprites/UI/Menu/Buttons/0915.png";
+        buttons_.front().labelRel = "sprites/Tuneys/Normal/0915.png";
+        buttons_.front().labelRelActive = "sprites/Tuneys/Normal/0915.png";
     }
     if (buttons_.size() > (size_t)kCols) {
         buttons_[(size_t)kCols + 0].labelRel = "sprites/UI/Fonts/1003.png";
