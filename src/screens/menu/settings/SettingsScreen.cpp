@@ -6,8 +6,10 @@
 #include "screens/menu/MenuBg.h"
 #include "screens/menu/SpritePath.h"
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <string>
+#include <string_view>
 
 namespace {
 #if defined(PLATFORM_ANDROID) || defined(__ANDROID__) || defined(__EMSCRIPTEN__)
@@ -100,6 +102,23 @@ static void drawRoundedRectPx(Rectangle r, float radiusPx, Color color) {
     float minSide = std::min(r.width, r.height);
     float roundness = (minSide > 0.0f) ? std::min(1.0f, (radiusPx * 2.0f) / minSide) : 0.0f;
     DrawRectangleRounded(r, roundness, 8, color);
+}
+
+static bool ShouldAppendAlphaSuffix(std::string_view version) {
+    size_t i = 0;
+    while (i < version.size() && std::isspace((unsigned char)version[i])) ++i;
+    if (i < version.size() && (version[i] == 'v' || version[i] == 'V')) ++i;
+
+    bool hasMajor = false;
+    int major = 0;
+    while (i < version.size() && std::isdigit((unsigned char)version[i])) {
+        hasMajor = true;
+        major = major * 10 + (version[i] - '0');
+        ++i;
+    }
+
+    if (!hasMajor) return false;
+    return major < 1;
 }
 }
 
@@ -580,7 +599,8 @@ void SettingsScreen::draw(const DrawContext& ctx) {
 
     back_.draw(*ctx.assets);
 
-    const std::string versionText = std::string("v") + buildinfo::kVersion;
+    std::string versionText = std::string("v") + buildinfo::kVersion;
+    if (ShouldAppendAlphaSuffix(buildinfo::kVersion)) versionText += " alpha";
     const int versionFontSize = 12;
     const int versionY = vh - 8 - versionFontSize;
     const int versionX = (vw - MeasureText(versionText.c_str(), versionFontSize)) / 2;
