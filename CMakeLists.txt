@@ -39,6 +39,9 @@ set(MW_RECREATION_SOURCES
   src/core/Profile.cpp
   src/core/VirtualScreen.cpp
   src/game/HealthSystem.cpp
+  src/game/ScoreComboSystem.cpp
+  src/game/RhythmSystem.cpp
+  src/game/TuneySystem.cpp
 
   src/ui/Widgets.cpp
 
