@@ -1,8 +1,5 @@
 # Music World Recreation
 
-[![Build All Platforms](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/build_workflow.yml/badge.svg)](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/build_workflow.yml)
-[![Build Mobile Applications](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/mobile_build.yml/badge.svg)](https://github.com/IlyaBOT/MusicWorld-Recreation/actions/workflows/mobile_build.yml)
-
 Music World recreation for Android, iOS, PC and Mac, using C++17 with raylib and CMake. Desktop project is in `build/` directory, Android project is in `android/` directory, *iOS version WIP*.
 
 ## Screenshots
@@ -22,18 +19,24 @@ Music World recreation for Android, iOS, PC and Mac, using C++17 with raylib and
 ## Project progress
 - Virtual resolution **240x400** (scales with letterboxing).
 - Screens:
-  - Splash Screen (LG Electronics and Com2us logos) [✓]
-  - Title Screen (Music World logo) [✓]
+  - Splash Screen *(LG Electronics and Com2us logos)* [✓]
+  - Title Screen *(Music World logo)* [✓]
   - Main Menu [✓]
   - Game mode select + Difficulty select scerens [✓]
-  - Music Player (Fully functional track carousel with swipe support + Working 10-band EQ) [✓]
-  - Settings (vibration toggle + music toggle + music remix toggle + 2 timing sliders. Language selection will be added later.) [✓]
+  - Music Player *(Fully functional track carousel with swipe support + Working 10-band EQ)* [✓]
+  - Settings *(Vibration toggle + Music toggle + Music Remix toggle + 2 Timing Sliders)* [✓]
+  - - Language settings [X]
   - Records [✓]
   - Tutorial [X]
-  - Levels:
-  - - Rythm game logic (Timer with accuracy assessment system and rewards) [X]
+  - Gameplay mechanics:
+  - - Healthbar, health system and GameOver screen [✓]
+  - - "Tuneys" object system: [X] **<-- [Work in Progress]**
+  - - - Tuney's spawn and despawn *(when it leaves the screen borders)* function [✓]
+  - - - Tuney's ‘throw’ animation and movement to the ‘touch’ point [✓]
+  - - - Tuney's support group animations at the bottom of the screen [X]
+  - - Rythm game logic *(Timer with accuracy assessment system and rewards)* [✓]
+  - - Score, Combo and "Blitz" system [Partially]
   - - Game progress logic ("Track" map with the ability to unlock locations as you progress through the game) [X]
-  - - Animation and “throwing” Tuneys to the rhythm of the tap point [X]
   - - Boss Fights [X]
 - Locks:
   - Party mode locked until `storyCompleted=true`
@@ -79,7 +82,6 @@ cmake --build build -j
 ```bash
 ./build/mw_recreation
 ```
-
 or use script for make ready macOS application:
 
 ```bash
@@ -92,8 +94,6 @@ Script output:
 - Creates `Music World Recreation.app` in repo root.
 - Reads app version from `VERSION` for `Info.plist`.
 - Codesigns app with ad-hoc signature and opens it.
-
----
 
 ## Build on Linux
 ### Requirements
